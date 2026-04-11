@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sentinel AI | Intelligent Talent Guard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'SF Pro Display', 'Segoe UI', sans-serif; background: #0b0c10; min-height: 100vh; color: #c5c6c7; overflow-x: hidden; }
+        
+        :root { --sentinel-blue: #88BDF2; --sentinel-glow: rgba(136, 189, 242, 0.2); }
+
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% 0%, var(--sentinel-glow) 0%, transparent 50%); }
+        
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: rgba(31, 40, 51, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(136,189,242,0.2); position: sticky; top: 0; z-index: 100; }
+        .logo-section h1 { color: var(--sentinel-blue); font-size: 1.8rem; letter-spacing: 3px; font-weight: 800; text-shadow: 0 0 15px var(--sentinel-glow); }
+        .nav-status { font-size: 0.8rem; color: #45a29e; font-weight: bold; text-transform: uppercase; border: 1px solid #45a29e; padding: 4px 12px; border-radius: 20px; }
+
+        .layout-wrapper { display: grid; grid-template-columns: 300px 1fr; gap: 25px; padding: 25px; max-width: 1700px; margin: 0 auto; }
+
+        .sidebar { background: rgba(31, 40, 51, 0.6); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.1); height: fit-content; position: sticky; top: 100px; }
+        .sidebar h2 { color: var(--sentinel-blue); font-size: 1.1rem; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid rgba(136,189,242,0.2); padding-bottom: 10px; letter-spacing: 1px; }
+        .filter-group { margin-bottom: 25px; }
+        .filter-label { font-size: 0.9rem; color: #fff; margin-bottom: 12px; display: block; font-weight: 600; }
+        .range-slider { width: 100%; cursor: pointer; accent-color: var(--sentinel-blue); }
+        .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
+        .check-item { font-size: 0.85rem; display: flex; align-items: center; gap: 10px; cursor: pointer; }
+        .check-item input { width: 16px; height: 16px; accent-color: var(--sentinel-blue); }
+
+        .main-content { display: flex; flex-direction: column; gap: 25px; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .card { background: rgba(31, 40, 51, 0.4); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.1); transition: 0.3s; }
+        .card:hover { border-color: var(--sentinel-blue); box-shadow: 0 0 20px var(--sentinel-glow); }
+        .card-header { font-weight: bold; color: #fff; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+
+        .file-input-wrapper { margin-bottom: 15px; padding: 15px; border: 2px dashed rgba(136,189,242,0.2); border-radius: 10px; text-align: center; background: rgba(11, 12, 16, 0.5); }
+        .file-input-wrapper input { color: var(--sentinel-blue); font-size: 0.8rem; }
+        .or-divider { text-align: center; margin: 10px 0; font-size: 0.7rem; color: #45a29e; font-weight: bold; }
+
+        textarea { width: 100%; height: 220px; background: rgba(11, 12, 16, 0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; color: var(--sentinel-blue); font-family: 'Courier New', monospace; resize: none; font-size: 13px; }
+        
+        .btn-analyze { width: 100%; padding: 18px; background: var(--sentinel-blue); border: none; border-radius: 12px; font-weight: 800; color: #0b0c10; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; font-size: 1.1rem; }
+        .btn-analyze:hover { background: #fff; box-shadow: 0 0 30px var(--sentinel-blue); transform: translateY(-2px); }
+
+        /* Pipeline Styles */
+        .agent-panel { background: rgba(31, 40, 51, 0.4); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.2); }
+        .agent-title { font-size: 1.1rem; margin-bottom: 20px; color: var(--sentinel-blue); font-weight: bold; text-transform: uppercase; }
+        .agent-status { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(11, 12, 16, 0.6); border-radius: 10px; margin: 10px 0; }
+        .agent-status.active { border-left: 3px solid var(--sentinel-blue); }
+        .agent-status.completed { border-left: 3px solid #45a29e; }
+        .agent-spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--sentinel-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .checkmark { color: #45a29e; font-weight: bold; }
+
+        /* Report Styles */
+        .results-panel { background: rgba(31, 40, 51, 0.9); border-radius: 20px; border: 2px solid var(--sentinel-blue); padding: 35px; box-shadow: 0 0 40px var(--sentinel-glow); }
+        .score-box { display: flex; align-items: center; gap: 40px; margin-bottom: 30px; }
+        .circle-wrap { width: 140px; height: 140px; position: relative; }
+        .score-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: bold; color: var(--sentinel-blue); }
+        .skill-badge { display: inline-block; padding: 6px 14px; border: 1px solid var(--sentinel-blue); border-radius: 5px; color: var(--sentinel-blue); font-size: 0.85rem; margin: 5px; font-weight: bold; }
+        .question-item { background: rgba(11, 12, 16, 0.7); padding: 18px; margin: 12px 0; border-radius: 10px; border-left: 4px solid var(--sentinel-blue); color: #fff; }
+        .live-log { background: #0b0c10; border-radius: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); font-family: monospace; font-size: 0.8rem; max-height: 150px; overflow-y: auto; margin-top: 20px; }
+        .log-line { color: var(--sentinel-blue); padding: 4px 0; }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <nav class="navbar">
+        <div class="logo-section"><h1>SENTINEL AI</h1></div>
+        <div class="nav-status">System Mode: Advanced Surveillance</div>
+    </nav>
+
+    <div class="layout-wrapper">
+        <aside class="sidebar">
+            <h2>Smart Filters</h2>
+            <div class="filter-group">
+                <label class="filter-label">Experience Bracket</label>
+                <div class="checkbox-group">
+                    <label class="check-item"><input type="checkbox" id="fresher"> Fresher (0-1 yr)</label>
+                    <label class="check-item"><input type="checkbox" id="junior" checked> Junior (1-3 yrs)</label>
+                    <label class="check-item"><input type="checkbox" id="mid" checked> Mid-Level (3-5 yrs)</label>
+                    <label class="check-item"><input type="checkbox" id="senior" checked> Senior (5+ yrs)</label>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Min. AI Match Score</label>
+                <input type="range" class="range-slider" min="0" max="100" value="70" id="scoreFilter">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 8px;">
+                    <span>0%</span><span id="scoreVal" style="color:var(--sentinel-blue); font-weight:bold;">70%</span><span>100%</span>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label class="filter-label">Verification Tiers</label>
+                <div class="checkbox-group">
+                    <label class="check-item"><input type="checkbox" checked> Semantic Skill Match</label>
+                    <label class="check-item"><input type="checkbox" checked> BS-Factor Detection</label>
+                    <label class="check-item"><input type="checkbox"> Project Authenticity</label>
+                </div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <form id="sentinelForm" onsubmit="runSentinelScan(event)">
+                <div class="input-grid">
+                    <div class="card">
+                        <div class="card-header">📄 Candidate Dossier</div>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx,.txt">
+                        </div>
+                        <div class="or-divider">-- OR PASTE MANUALLY --</div>
+                        <textarea id="resumeText" name="resume" placeholder="Paste resume content here..."></textarea>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">🎯 Target Objectives</div>
+                        <textarea id="jdText" name="jd" placeholder="Paste Job Description here..." required></textarea>
+                    </div> <br>
+                </div>
+
+<br>
+
+                <button type="submit" class="btn-analyze" id="analyzeBtn">Initialize Sentinel Scan</button>
+            </form>
+
+            <div class="agent-panel" id="agentPanel" style="display: none;">
+                <div class="agent-title">Neural Pipeline: Online</div>
+                <div id="agent1" class="agent-status"><div class="agent-name">Node 1: Parser</div><div id="agent1Action" class="agent-action">Awaiting...</div><div id="agent1Status" class="agent-spinner"></div></div>
+                <div id="agent2" class="agent-status"><div class="agent-name">Node 2: Normalizer</div><div id="agent2Action" class="agent-action">Awaiting...</div><div id="agent2Status"></div></div>
+                <div id="agent3" class="agent-status"><div class="agent-name">Node 3: Matcher</div><div id="agent3Action" class="agent-action">Awaiting...</div><div id="agent3Status"></div></div>
+                <div id="agent4" class="agent-status"><div class="agent-name">Node 4: Inquisitor</div><div id="agent4Action" class="agent-action">Awaiting...</div><div id="agent4Status"></div></div>
+                <div class="live-log" id="liveLog"></div>
+            </div>
+
+            <div id="resultsPanel" style="display: none;">
+                <div class="results-panel">
+                    <h2 style="color: var(--sentinel-blue); margin-bottom: 30px; text-transform: uppercase;">Synthesis Report</h2>
+                    <div class="score-box">
+                        <div class="circle-wrap">
+                            <svg width="140" height="140">
+                                <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                                <circle id="scoreArc" cx="70" cy="70" r="62" fill="none" stroke="#88BDF2" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="390" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+                            </svg>
+                            <div class="score-val" id="scoreNum">0%</div>
+                        </div>
+                        <div>
+                            <h3 id="grade">---</h3>
+                            <p id="matchDesc" style="margin-top: 10px; color: var(--sentinel-blue);"></p>
+                        </div>
+                    </div>
+                    <div id="skillsContainer"></div>
+                    <p id="insightText" style="background: rgba(11,12,16,0.6); padding: 20px; border-radius: 10px; border-left: 3px solid var(--sentinel-blue); margin-top: 20px;"></p>
+                    <div id="questionsContainer" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.getElementById('scoreFilter').oninput = function() {
+            document.getElementById('scoreVal').innerText = this.value + "%";
+        };
+
+        async function runSentinelScan(event) {
+            event.preventDefault(); // Form reload roko
+            
+            const form = document.getElementById('sentinelForm');
+            const formData = new FormData(form);
+            const minScore = document.getElementById('scoreFilter').value;
+
+            // UI Reset
+            document.getElementById('agentPanel').style.display = 'block';
+            document.getElementById('resultsPanel').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            resetUI();
+            addLog("INITIATING NEURAL UPLINK...");
+            
+            try {
+                // IMPORTANT: FormData ke saath headers set nahi karne padte (Browser khud boundary set karega)
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+
+                if(data.score < minScore) {
+                    addLog(`⚠️ ALERT: Candidate match (${data.score}%) is below set threshold (${minScore}%).`);
+                }
+
+                await animatePipeline(data);
+            } catch (e) {
+                addLog("❌ CONNECTION ERROR: Backend unreachable.");
+                console.error(e);
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        function resetUI() {
+            ['agent1', 'agent2', 'agent3', 'agent4'].forEach(id => {
+                document.getElementById(id).classList.remove('active', 'completed');
+                document.getElementById(`${id}Status`).innerHTML = '';
+            });
+            document.getElementById('liveLog').innerHTML = '';
+        }
+
+        function addLog(msg) {
+            const log = document.getElementById('liveLog');
+            log.innerHTML += `<div class="log-line">> ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function animatePipeline(data) {
+            const steps = [
+                {n:1, act: "Parsing Document Structure..."},
+                {n:2, act: "Normalizing Semantic Jargon..."},
+                {n:3, act: `Alignment Score: ${data.score}%`},
+                {n:4, act: "Generating Contextual Questions..."}
+            ];
+            for(let s of steps) {
+                const agent = document.getElementById(`agent${s.n}`);
+                agent.classList.add('active');
+                document.getElementById(`agent${s.n}Action`).innerText = s.act;
+                document.getElementById(`agent${s.n}Status`).innerHTML = '<div class="agent-spinner"></div>';
+                addLog(s.act);
+                await new Promise(r => setTimeout(r, 1200));
+                agent.classList.replace('active', 'completed');
+                document.getElementById(`agent${s.n}Status`).innerHTML = '<span class="checkmark">✓</span>';
+            }
+            displayFinalReport(data);
+        }
+
+        function displayFinalReport(data) {
+            const score = data.score || 0;
+            const circumference = 390; 
+            const offset = circumference - (score / 100) * circumference;
+            document.getElementById('scoreArc').style.strokeDashoffset = offset;
+            document.getElementById('scoreNum').innerText = score + "%";
+            document.getElementById('grade').innerText = score >= 80 ? "🛡️ GUARDIAN APPROVED" : "⚠️ SCRUTINY REQUIRED";
+            document.getElementById('matchDesc').innerText = score >= 70 ? "High alignment confirmed." : "Anomalies detected.";
+            
+            document.getElementById('skillsContainer').innerHTML = (data.skills || []).map(s => `<span class="skill-badge">${s}</span>`).join('');
+            document.getElementById('insightText').innerText = data.insight || "No detailed insight available.";
+            document.getElementById('questionsContainer').innerHTML = (data.questions || []).map(q => `<div class="question-item">» ${q}</div>`).join('');
+
+            document.getElementById('resultsPanel').style.display = 'block';
+            document.getElementById('analyzeBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>
