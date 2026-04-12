@@ -3,172 +3,758 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
     <title>Sentinel AI | Intelligent Talent Guard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        /* Reset and Base Styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'SF Pro Display', 'Segoe UI', sans-serif; background: #0b0c10; min-height: 100vh; color: #c5c6c7; overflow-x: hidden; }
-        
-        :root { --sentinel-blue: #88BDF2; --sentinel-glow: rgba(136, 189, 242, 0.2); }
+        html { font-size: 16px; line-height: 1.5; }
+        body {
+            font-family: 'Inter', 'SF Pro Display', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0c0a09 0%, #1e1b4b 20%, #312e81 40%, #7c3aed 60%, #a855f7 80%, #ec4899 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .bg-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at 50% 0%, var(--sentinel-glow) 0%, transparent 50%); }
-        
-        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: rgba(31, 40, 51, 0.8); backdrop-filter: blur(15px); border-bottom: 1px solid rgba(136,189,242,0.2); position: sticky; top: 0; z-index: 100; }
-        .logo-section h1 { color: var(--sentinel-blue); font-size: 1.8rem; letter-spacing: 3px; font-weight: 800; text-shadow: 0 0 15px var(--sentinel-glow); }
-        .nav-status { font-size: 0.8rem; color: #45a29e; font-weight: bold; text-transform: uppercase; border: 1px solid #45a29e; padding: 4px 12px; border-radius: 20px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.9); }
+        ::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #7c3aed; }
 
-        .layout-wrapper { display: grid; grid-template-columns: 300px 1fr; gap: 25px; padding: 25px; max-width: 1700px; margin: 0 auto; }
+        /* Color Palette */
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #6b21a8;
+            --secondary: #06b6d4;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --warning: #f97316;
+            --error: #ef4444;
+            --glow-primary: rgba(124, 58, 237, 0.5);
+            --glow-secondary: rgba(6, 182, 212, 0.4);
+            --shadow-light: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-medium: 0 4px 6px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-heavy: 0 10px 25px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
+        }
 
-        .sidebar { background: rgba(31, 40, 51, 0.6); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.1); height: fit-content; position: sticky; top: 100px; }
-        .sidebar h2 { color: var(--sentinel-blue); font-size: 1.1rem; margin-bottom: 20px; text-transform: uppercase; border-bottom: 1px solid rgba(136,189,242,0.2); padding-bottom: 10px; letter-spacing: 1px; }
-        .filter-group { margin-bottom: 25px; }
-        .filter-label { font-size: 0.9rem; color: #fff; margin-bottom: 12px; display: block; font-weight: 600; }
-        .range-slider { width: 100%; cursor: pointer; accent-color: var(--sentinel-blue); }
-        .checkbox-group { display: flex; flex-direction: column; gap: 10px; }
-        .check-item { font-size: 0.85rem; display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .check-item input { width: 16px; height: 16px; accent-color: var(--sentinel-blue); }
+        /* Background Animation */
+        .bg-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+            background:
+                radial-gradient(circle at 20% 80%, var(--glow-primary) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--glow-secondary) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(245, 158, 11, 0.2) 0%, transparent 50%);
+            animation: bg-shift 20s ease-in-out infinite alternate;
+        }
+        @keyframes bg-shift { 0%, 100% { transform: scale(1); } 100% { transform: scale(1.05); } }
 
-        .main-content { display: flex; flex-direction: column; gap: 25px; }
-        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-        .card { background: rgba(31, 40, 51, 0.4); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.1); transition: 0.3s; }
-        .card:hover { border-color: var(--sentinel-blue); box-shadow: 0 0 20px var(--sentinel-glow); }
-        .card-header { font-weight: bold; color: #fff; margin-bottom: 15px; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        /* Layout */
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1rem; flex: 1; width: 100%; }
+        .layout-wrapper { display: grid; grid-template-columns: 300px 1fr; gap: 2rem; }
 
-        .file-input-wrapper { margin-bottom: 15px; padding: 15px; border: 2px dashed rgba(136,189,242,0.2); border-radius: 10px; text-align: center; background: rgba(11, 12, 16, 0.5); }
-        .file-input-wrapper input { color: var(--sentinel-blue); font-size: 0.8rem; }
-        .or-divider { text-align: center; margin: 10px 0; font-size: 0.7rem; color: #45a29e; font-weight: bold; }
+        /* Sleek Professional Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 0 1.5rem 0;
+            margin-bottom: 2.5rem;
+            border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        }
+        .navbar {
+            background: rgba(15, 23, 42, 0.72);
+            border: 1px solid rgba(124, 58, 237, 0.28);
+            border-radius: 0.95rem;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(14px);
+        }
+        .header h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+        .header h1 span { color: var(--primary); }
 
-        textarea { width: 100%; height: 220px; background: rgba(11, 12, 16, 0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 15px; color: var(--sentinel-blue); font-family: 'Courier New', monospace; resize: none; font-size: 13px; }
-        
-        .btn-analyze { width: 100%; padding: 18px; background: var(--sentinel-blue); border: none; border-radius: 12px; font-weight: 800; color: #0b0c10; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s; font-size: 1.1rem; }
-        .btn-analyze:hover { background: #fff; box-shadow: 0 0 30px var(--sentinel-blue); transform: translateY(-2px); }
+        /* Authentication Header Buttons */
+        .auth-btn-header {
+            border: 1px solid rgba(124, 58, 237, 0.5);
+            background: rgba(124, 58, 237, 0.18);
+            color: #e2e8f0;
+            border-radius: 0.65rem;
+            padding: 0.55rem 1.2rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .auth-btn-header:hover { 
+            background: rgba(124, 58, 237, 0.35); 
+            border-color: var(--primary); 
+            color: #fff;
+        }
+        .auth-btn-header.logout {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.12);
+        }
+        .auth-btn-header.logout:hover {
+            background: rgba(239, 68, 68, 0.25);
+            border-color: #ef4444;
+        }
 
-        /* Pipeline Styles */
-        .agent-panel { background: rgba(31, 40, 51, 0.4); border-radius: 15px; padding: 25px; border: 1px solid rgba(136,189,242,0.2); }
-        .agent-title { font-size: 1.1rem; margin-bottom: 20px; color: var(--sentinel-blue); font-weight: bold; text-transform: uppercase; }
-        .agent-status { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(11, 12, 16, 0.6); border-radius: 10px; margin: 10px 0; }
-        .agent-status.active { border-left: 3px solid var(--sentinel-blue); }
-        .agent-status.completed { border-left: 3px solid #45a29e; }
-        .agent-spinner { width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.1); border-top-color: var(--sentinel-blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .header-controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
+        .profile-menu { position: relative; }
+        .profile-icon-btn {
+            width: 44px; height: 44px; border-radius: 999px;
+            border: 1px solid rgba(124, 58, 237, 0.5); background: rgba(124, 58, 237, 0.2);
+            color: #e2e8f0; display: inline-flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: 0.2s ease;
+        }
+        .profile-icon-btn:hover { background: rgba(124, 58, 237, 0.35); border-color: var(--primary); }
+        .profile-icon { width: 20px; height: 20px; opacity: 0.95; }
+        .profile-dropdown {
+            position: absolute; top: 52px; right: 0; width: 280px;
+            background: rgba(15, 23, 42, 0.96); border: 1px solid rgba(124, 58, 237, 0.35);
+            border-radius: 0.8rem; box-shadow: var(--shadow-heavy); padding: 0.8rem;
+            display: none; z-index: 12;
+        }
+        .profile-dropdown.is-open { display: block; }
+        .profile-title {
+            font-size: 0.72rem; color: var(--secondary); margin-bottom: 0.55rem;
+            text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+        }
+        .profile-select {
+            width: 100%; background: rgba(15, 23, 42, 0.85); color: #e2e8f0;
+            border: 1px solid rgba(124, 58, 237, 0.45); border-radius: 0.65rem;
+            padding: 0.55rem 0.75rem; font-size: 0.85rem; font-family: 'Inter', sans-serif;
+            margin-bottom: 0.55rem;
+        }
+        .profile-btn {
+            border: 1px solid rgba(124, 58, 237, 0.5); background: rgba(124, 58, 237, 0.18);
+            color: #e2e8f0; border-radius: 0.65rem; padding: 0.55rem 0.85rem;
+            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+            cursor: pointer; transition: 0.2s ease;
+        }
+        .profile-btn:hover { background: rgba(124, 58, 237, 0.35); border-color: var(--primary); }
+
+        /* Sidebar Specifics */
+        .sidebar {
+            height: fit-content; position: sticky; top: 2rem;
+            background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(124, 58, 237, 0.2);
+            border-radius: 1rem; padding: 2rem; box-shadow: var(--shadow-medium); backdrop-filter: blur(16px);
+        }
+        .sidebar h2 {
+            color: #e2e8f0; font-size: 1rem; margin-bottom: 1.5rem; text-transform: uppercase;
+            letter-spacing: 0.12em; border-bottom: 1px solid rgba(124, 58, 237, 0.3); padding-bottom: 0.75rem;
+        }
+        .filter-group { margin-bottom: 2rem; }
+        .filter-label { 
+            font-size: 0.875rem; color: var(--secondary); margin-bottom: 1rem; 
+            display: block; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .score-range { display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 0.5rem; color: #cbd5e1; }
+        #scoreVal { color: var(--primary); font-weight: 700; }
+
+        /* Custom Checkboxes */
+        .checkbox-group { display: flex; flex-direction: column; gap: 0.75rem; }
+        .check-item { font-size: 0.9rem; display: flex; align-items: center; gap: 0.75rem; cursor: pointer; transition: 0.2s; color: #cbd5e1; }
+        .check-item:hover { color: var(--primary); }
+        .check-item input[type="checkbox"] {
+            appearance: none; -webkit-appearance: none; width: 1.25rem; height: 1.25rem;
+            border: 2px solid rgba(124, 58, 237, 0.5); border-radius: 4px; background: rgba(15, 23, 42, 0.8);
+            display: grid; place-content: center; transition: all 0.2s ease; cursor: pointer;
+        }
+        .check-item input[type="checkbox"]::before {
+            content: ""; width: 0.65em; height: 0.65em; transform: scale(0); transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em #fff; background-color: #fff; transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .check-item input[type="checkbox"]:checked { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 10px var(--glow-primary); }
+        .check-item input[type="checkbox"]:checked::before { transform: scale(1); }
+
+        /* Custom Range Slider */
+        .range-slider { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.1); border-radius: 5px; outline: none; -webkit-appearance: none; cursor: pointer; }
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%;
+            background: var(--primary); box-shadow: 0 0 10px var(--glow-primary); cursor: pointer; transition: all 0.2s ease;
+        }
+        .range-slider::-webkit-slider-thumb:hover { transform: scale(1.2); background: var(--accent); box-shadow: 0 0 15px rgba(245, 158, 11, 0.6); }
+
+        /* Main Grid & Cards */
+        .main-content { display: flex; flex-direction: column; gap: 2rem; }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .card {
+            background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(20px); border-radius: 1rem; padding: 2rem;
+            border: 1px solid rgba(124, 58, 237, 0.15); box-shadow: var(--shadow-medium); transition: all 0.4s ease; position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); transform: scaleX(0); transition: transform 0.4s ease;
+        }
+        .card:hover::before { transform: scaleX(1); }
+        .card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; font-size: 1.25rem; font-weight: 600; color: #fff; }
+
+        /* Drag & Drop File Upload UI */
+        .file-input-wrapper {
+            margin-bottom: 1rem; padding: 1rem; border: 2px dashed rgba(124, 58, 237, 0.35); border-radius: 0.75rem;
+            text-align: center; background: rgba(15, 23, 42, 0.6); position: relative; overflow: hidden;
+        }
+        .file-input-wrapper input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; z-index: 1; }
+        .file-drop {
+            min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.35rem;
+            border: 1px dashed rgba(124, 58, 237, 0.45); border-radius: 0.65rem;
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.7), rgba(30, 41, 59, 0.5)); color: #e2e8f0;
+            box-shadow: var(--shadow-light); position: relative; padding: 1rem 1.25rem; z-index: 0;
+        }
+        .file-drop.is-disabled { opacity: 0.6; filter: grayscale(0.2); }
+        .file-drop-title { font-size: 0.95rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+        .file-drop-sub { font-size: 0.8rem; color: var(--secondary); }
+        .file-name { margin-top: 0.35rem; font-size: 0.75rem; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; word-break: break-all; }
+        .file-remove-btn {
+            position: absolute; top: 0.6rem; right: 0.6rem; width: 32px; height: 32px; border-radius: 999px;
+            border: 1px solid rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.12); color: #fecaca;
+            font-size: 0.9rem; font-weight: 800; cursor: pointer; transition: all 0.2s ease; display: none; align-items: center; justify-content: center; z-index: 2;
+        }
+        .file-remove-btn:hover { background: rgba(239, 68, 68, 0.25); color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.35); }
+        .file-input-wrapper:hover .file-drop { border-color: var(--primary); box-shadow: 0 0 18px var(--glow-primary); }
+        .or-divider { text-align: center; margin: 0.75rem 0; font-size: 0.75rem; color: var(--secondary); font-weight: 700; letter-spacing: 0.08em; }
+
+        /* Textareas */
+        textarea {
+            width: 100%; min-height: 250px; background: rgba(30, 41, 59, 0.8); border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.75rem; padding: 1.25rem; color: var(--secondary); font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem; line-height: 1.6; resize: vertical; transition: all 0.3s ease; box-shadow: var(--shadow-light);
+        }
+        textarea::placeholder { color: rgba(226, 232, 240, 0.4); }
+        textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--glow-primary); background: rgba(30, 41, 59, 1); }
+        textarea:disabled { opacity: 0.6; cursor: not-allowed; background: rgba(30, 41, 59, 0.4); border-color: rgba(124, 58, 237, 0.2); }
+
+        /* Button */
+        .btn-analyze {
+            width: 100%; padding: 1.25rem 2rem; background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none; border-radius: 0.75rem; font-size: 1.125rem; font-weight: 800; color: #fff; cursor: pointer;
+            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.1em; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.4);
+            position: relative; overflow: hidden; margin-bottom: 2rem;
+        }
+        .btn-analyze::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent); transition: left 0.5s;
+        }
+        .btn-analyze:hover::before { left: 100%; }
+        .btn-analyze:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.6); }
+        .btn-analyze:active { transform: translateY(0); }
+        .btn-analyze:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: var(--shadow-light); }
+
+        /* Agent Panel */
+        .agent-panel {
+            background: rgba(15, 23, 42, 0.8); border-radius: 1rem; padding: 2rem; margin-bottom: 2rem;
+            border: 1px solid rgba(6, 182, 212, 0.2); box-shadow: var(--shadow-medium);
+        }
+        .agent-title { font-size: 1.25rem; font-weight: 700; color: var(--primary); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 0.05em; text-shadow: 0 0 20px var(--glow-primary); }
+        .agent-status {
+            display: flex; align-items: center; gap: 1rem; padding: 1.25rem; background: rgba(30, 41, 59, 0.7);
+            border-radius: 0.75rem; margin: 0.75rem 0; border-left: 4px solid transparent; transition: all 0.3s ease; box-shadow: var(--shadow-light);
+        }
+        .agent-status.active {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.05));
+            border-left-color: var(--primary); box-shadow: 0 0 20px var(--glow-primary), var(--shadow-medium); animation: pulse 2s ease-in-out infinite;
+        }
+        .agent-status.completed { border-left-color: var(--success); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05)); }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
+        .agent-info { flex: 1; }
+        .agent-name { font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
+        .agent-action { font-size: 0.875rem; color: var(--secondary); font-family: 'JetBrains Mono', monospace; }
+        .agent-spinner { width: 1.5rem; height: 1.5rem; border: 2px solid rgba(255, 255, 255, 0.2); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; flex-shrink: 0; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .checkmark { color: #45a29e; font-weight: bold; }
+        .checkmark { color: var(--success); font-size: 1.25rem; font-weight: 700; flex-shrink: 0; }
 
-        /* Report Styles */
-        .results-panel { background: rgba(31, 40, 51, 0.9); border-radius: 20px; border: 2px solid var(--sentinel-blue); padding: 35px; box-shadow: 0 0 40px var(--sentinel-glow); }
-        .score-box { display: flex; align-items: center; gap: 40px; margin-bottom: 30px; }
-        .circle-wrap { width: 140px; height: 140px; position: relative; }
-        .score-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: bold; color: var(--sentinel-blue); }
-        .skill-badge { display: inline-block; padding: 6px 14px; border: 1px solid var(--sentinel-blue); border-radius: 5px; color: var(--sentinel-blue); font-size: 0.85rem; margin: 5px; font-weight: bold; }
-        .question-item { background: rgba(11, 12, 16, 0.7); padding: 18px; margin: 12px 0; border-radius: 10px; border-left: 4px solid var(--sentinel-blue); color: #fff; }
-        .live-log { background: #0b0c10; border-radius: 10px; padding: 15px; border: 1px solid rgba(255,255,255,0.05); font-family: monospace; font-size: 0.8rem; max-height: 150px; overflow-y: auto; margin-top: 20px; }
-        .log-line { color: var(--sentinel-blue); padding: 4px 0; }
+        /* Results Panel */
+        .results-panel {
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(25px); border-radius: 1.5rem; padding: 3rem; margin-top: 2rem;
+            border: 1px solid var(--primary); box-shadow: 0 0 50px var(--glow-primary), var(--shadow-heavy); animation: fadeInUp 0.8s ease-out; position: relative; overflow: hidden;
+        }
+        .results-panel::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent)); }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .results-title { display: flex; align-items: center; gap: 1rem; color: var(--primary); margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 0.05em; font-size: 1.75rem; font-weight: 800; text-shadow: 0 0 25px var(--glow-primary); }
+
+        .score-box { background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.05)); border: 1px solid var(--primary); border-radius: 1rem; padding: 2rem; display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-medium); }
+        .circle-wrap { width: 140px; height: 140px; position: relative; filter: drop-shadow(0 0 20px var(--glow-primary)); flex-shrink: 0; }
+        .score-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.5rem; font-weight: 800; color: var(--primary); text-shadow: 0 0 20px var(--glow-primary); }
+        .match-grade { font-size: 1.5rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.02em; }
+        .match-desc { color: var(--secondary); font-size: 1rem; line-height: 1.6; margin: 0; }
+
+        .skills-container { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem;}
+        .skill-badge {
+            display: inline-flex; align-items: center; background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.1));
+            border: 1px solid var(--primary); color: var(--primary); padding: 0.5rem 1rem; border-radius: 2rem; font-size: 0.875rem; font-weight: 600; letter-spacing: 0.02em; transition: all 0.3s ease;
+        }
+        .skill-badge:hover { background: var(--primary); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4); }
+
+        .insight-text { background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.6)); border-radius: 0.75rem; padding: 1.5rem; border-left: 4px solid var(--primary); box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); color: #e2e8f0; font-size: 1rem; line-height: 1.7; font-style: italic; margin-bottom: 2rem; }
+        .questions-container { display: grid; gap: 1rem; }
+        .question-item { background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.6)); padding: 1.25rem; border-radius: 0.75rem; border-left: 4px solid var(--accent); color: #fff; font-size: 1rem; line-height: 1.6; transition: all 0.3s ease; box-shadow: var(--shadow-light); }
+        .question-item:hover { background: linear-gradient(135deg, rgba(30, 41, 59, 1), rgba(15, 23, 42, 0.8)); border-left-color: var(--primary); transform: translateX(8px); }
+
+        .live-log { background: rgba(30, 41, 59, 0.9); border-radius: 0.5rem; padding: 1rem; border: 1px solid rgba(255, 255, 255, 0.05); font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; max-height: 10rem; overflow-y: auto; margin-top: 1.5rem; box-shadow: var(--shadow-light); }
+        .log-line { color: var(--secondary); padding: 0.25rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .auth-banner {
+            margin: 0.8rem 0 1rem; padding: 0.75rem 0.9rem; border-radius: 0.65rem;
+            border: 1px solid rgba(251, 191, 36, 0.45); background: rgba(120, 53, 15, 0.32);
+            color: #fde68a; font-size: 0.88rem; display: none;
+        }
+
+        /* 🔥 NAYA: Team Footer Styles */
+        .footer {
+            text-align: center;
+            padding: 1.5rem 0;
+            margin-top: auto;
+            border-top: 1px solid rgba(124, 58, 237, 0.2);
+            background: rgba(10, 10, 10, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        .footer p {
+            color: var(--secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            margin: 0;
+        }
+        .team-name {
+            color: var(--primary);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 10px var(--glow-primary);
+        }
+
+        @media (max-width: 900px) {
+            .layout-wrapper { grid-template-columns: 1fr; }
+            .sidebar { position: static; }
+            .header { flex-direction: column; gap: 1rem; }
+            .header-controls { width: 100%; justify-content: flex-start; }
+            .input-grid { grid-template-columns: 1fr; }
+        }
+
+        
     </style>
 </head>
-<body>
+<body data-logged-in="{{ '1' if current_user.is_authenticated else '0' }}">
     <div class="bg-animation"></div>
-    <nav class="navbar">
-        <div class="logo-section"><h1>SENTINEL AI</h1></div>
-        <div class="nav-status">System Mode: Advanced Surveillance</div>
-    </nav>
+    
+    <div class="container">
+        <header class="header navbar">
+            <h1>🛡️ SENTINEL <span>AI</span></h1>
+            
+            <nav class="header-controls nav-actions" style="display: flex; align-items: center; gap: 15px;">
+                {% if current_user.is_authenticated %}
+                    <span style="color: #22d3ee; font-weight: 600; font-size: 0.95rem; letter-spacing: 0.5px;">
+                        👋 Hello, {{ current_user.full_name }}
+                    </span>
+                    <a href="#" id="viewDbBtn" class="auth-btn-header" style="border-color: #0ea5e9; color: #0ea5e9; background: rgba(14, 165, 233, 0.1);">
+                        🗄️ View Database
+                    </a>
+                    <a href="{{ url_for('signout') }}" class="auth-btn-header logout">Sign Out</a>
+                {% else %}
+                    <a href="{{ url_for('signin') }}" class="auth-btn-header">Sign In</a>
+                {% endif %}
 
-    <div class="layout-wrapper">
-        <aside class="sidebar">
-            <h2>Smart Filters</h2>
-            <div class="filter-group">
-                <label class="filter-label">Experience Bracket</label>
-                <div class="checkbox-group">
-                    <label class="check-item"><input type="checkbox" id="fresher"> Fresher (0-1 yr)</label>
-                    <label class="check-item"><input type="checkbox" id="junior" checked> Junior (1-3 yrs)</label>
-                    <label class="check-item"><input type="checkbox" id="mid" checked> Mid-Level (3-5 yrs)</label>
-                    <label class="check-item"><input type="checkbox" id="senior" checked> Senior (5+ yrs)</label>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Min. AI Match Score</label>
-                <input type="range" class="range-slider" min="0" max="100" value="70" id="scoreFilter">
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-top: 8px;">
-                    <span>0%</span><span id="scoreVal" style="color:var(--sentinel-blue); font-weight:bold;">70%</span><span>100%</span>
-                </div>
-            </div>
-
-            <div class="filter-group">
-                <label class="filter-label">Verification Tiers</label>
-                <div class="checkbox-group">
-                    <label class="check-item"><input type="checkbox" checked> Semantic Skill Match</label>
-                    <label class="check-item"><input type="checkbox" checked> BS-Factor Detection</label>
-                    <label class="check-item"><input type="checkbox"> Project Authenticity</label>
-                </div>
-            </div>
-        </aside>
-
-        <main class="main-content">
-            <form id="sentinelForm" onsubmit="runSentinelScan(event)">
-                <div class="input-grid">
-                    <div class="card">
-                        <div class="card-header">📄 Candidate Dossier</div>
-                        <div class="file-input-wrapper">
-                            <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx,.txt">
-                        </div>
-                        <div class="or-divider">-- OR PASTE MANUALLY --</div>
-                        <textarea id="resumeText" name="resume" placeholder="Paste resume content here..."></textarea>
+                <div class="profile-menu">
+                    <button type="button" id="profileMenuBtn" class="profile-icon-btn" aria-label="Open profile menu" title="Profiles">
+                        <svg class="profile-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                            <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"></circle>
+                            <path d="M4 20c0-4.2 3.6-7 8-7s8 2.8 8 7" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                    </button>
+                    <div id="profileDropdown" class="profile-dropdown" aria-hidden="true">
+                        <div class="profile-title">Saved Profiles</div>
+                        <select id="profileSelect" class="profile-select" aria-label="Saved profiles">
+                            <option value="">Select profile</option>
+                        </select>
+                        <button type="button" id="saveProfileBtn" class="profile-btn">Save Profile</button>
                     </div>
-                    <div class="card">
-                        <div class="card-header">🎯 Target Objectives</div>
-                        <textarea id="jdText" name="jd" placeholder="Paste Job Description here..." required></textarea>
-                    </div> <br>
+                </div>
+            </nav>
+        </header>
+
+        <div class="layout-wrapper">
+            <aside class="sidebar">
+                <h2>Smart Filters</h2>
+                <div class="filter-group">
+                    <label class="filter-label">Experience Bracket</label>
+                    <div class="checkbox-group">
+                        <label class="check-item"><input type="checkbox" id="fresher"> Fresher (0-1 yr)</label>
+                        <label class="check-item"><input type="checkbox" id="junior" checked> Junior (1-3 yrs)</label>
+                        <label class="check-item"><input type="checkbox" id="mid" checked> Mid-Level (3-5 yrs)</label>
+                        <label class="check-item"><input type="checkbox" id="senior" checked> Senior (5+ yrs)</label>
+                    </div>
                 </div>
 
-<br>
+                <div class="filter-group">
+                    <label class="filter-label">Min. AI Match Score</label>
+                    <input type="range" class="range-slider" min="0" max="100" value="70" id="scoreFilter">
+                    <div class="score-range">
+                        <span>0%</span><span id="scoreVal">70%</span><span>100%</span>
+                    </div>
+                </div>
 
-                <button type="submit" class="btn-analyze" id="analyzeBtn">Initialize Sentinel Scan</button>
-            </form>
+                <div class="filter-group">
+                    <label class="filter-label">Verification Tiers</label>
+                    <div class="checkbox-group">
+                        <label class="check-item"><input type="checkbox" checked> Semantic Skill Match</label>
+                        <label class="check-item"><input type="checkbox" checked> BS-Factor Detection</label>
+                        <label class="check-item"><input type="checkbox"> Project Authenticity</label>
+                    </div>
+                </div>
+            </aside>
 
-            <div class="agent-panel" id="agentPanel" style="display: none;">
-                <div class="agent-title">Neural Pipeline: Online</div>
-                <div id="agent1" class="agent-status"><div class="agent-name">Node 1: Parser</div><div id="agent1Action" class="agent-action">Awaiting...</div><div id="agent1Status" class="agent-spinner"></div></div>
-                <div id="agent2" class="agent-status"><div class="agent-name">Node 2: Normalizer</div><div id="agent2Action" class="agent-action">Awaiting...</div><div id="agent2Status"></div></div>
-                <div id="agent3" class="agent-status"><div class="agent-name">Node 3: Matcher</div><div id="agent3Action" class="agent-action">Awaiting...</div><div id="agent3Status"></div></div>
-                <div id="agent4" class="agent-status"><div class="agent-name">Node 4: Inquisitor</div><div id="agent4Action" class="agent-action">Awaiting...</div><div id="agent4Status"></div></div>
-                <div class="live-log" id="liveLog"></div>
-            </div>
-
-            <div id="resultsPanel" style="display: none;">
-                <div class="results-panel">
-                    <h2 style="color: var(--sentinel-blue); margin-bottom: 30px; text-transform: uppercase;">Synthesis Report</h2>
-                    <div class="score-box">
-                        <div class="circle-wrap">
-                            <svg width="140" height="140">
-                                <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-                                <circle id="scoreArc" cx="70" cy="70" r="62" fill="none" stroke="#88BDF2" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="390" stroke-linecap="round" transform="rotate(-90 70 70)"/>
-                            </svg>
-                            <div class="score-val" id="scoreNum">0%</div>
+            <main class="main-content">
+                <div id="scanAuthBanner" class="auth-banner">Login required. Please sign in to run Analyze.</div>
+                <form id="sentinelForm" onsubmit="runSentinelScan(event)">
+                    <div class="input-grid">
+                        <div class="card">
+                            <div class="card-header">Candidate Dossier</div>
+                            
+                            <div class="file-input-wrapper">
+                                <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx">
+                                <div class="file-drop">
+                                    <div class="file-drop-title">Drop your file here</div>
+                                    <div class="file-drop-sub">or click to browse (PDF/DOCX/TXT)</div>
+                                    <div class="file-name" id="resumeFileName">No file selected</div>
+                                    <button type="button" class="file-remove-btn" id="removeResumeFile" aria-label="Remove selected file" title="Remove selected file">X</button>
+                                </div>
+                            </div>
+                            
+                            <div class="or-divider">-- OR PASTE MANUALLY --</div>
+                            <textarea id="resumeText" name="resume" placeholder="Paste resume content here..."></textarea>
                         </div>
-                        <div>
-                            <h3 id="grade">---</h3>
-                            <p id="matchDesc" style="margin-top: 10px; color: var(--sentinel-blue);"></p>
+                        
+                        <div class="card">
+                            <div class="card-header">Target Objectives</div>
+                            <textarea id="jdText" name="jd" placeholder="Paste Job Description here..." required></textarea>
                         </div>
                     </div>
-                    <div id="skillsContainer"></div>
-                    <p id="insightText" style="background: rgba(11,12,16,0.6); padding: 20px; border-radius: 10px; border-left: 3px solid var(--sentinel-blue); margin-top: 20px;"></p>
-                    <div id="questionsContainer" style="margin-top: 20px;"></div>
+                    
+                    <button type="submit" class="btn-analyze" id="analyzeBtn">Initialize Sentinel Scan</button>
+                </form>
+
+                <div class="agent-panel" id="agentPanel" style="display: none;">
+                    <div class="agent-title">Neural Pipeline: Online</div>
+                    <div id="agent1" class="agent-status"><div class="agent-info"><div class="agent-name">Node 1: Semantic Parser</div><div id="agent1Action" class="agent-action">Awaiting...</div></div><div id="agent1Status" class="agent-spinner"></div></div>
+                    <div id="agent2" class="agent-status"><div class="agent-info"><div class="agent-name">Node 2: Ontology Normalizer</div><div id="agent2Action" class="agent-action">Awaiting...</div></div><div id="agent2Status"></div></div>
+                    <div id="agent3" class="agent-status"><div class="agent-info"><div class="agent-name">Node 3: Matching Engine</div><div id="agent3Action" class="agent-action">Awaiting...</div></div><div id="agent3Status"></div></div>
+                    <div id="agent4" class="agent-status"><div class="agent-info"><div class="agent-name">Node 4: The Inquisitor</div><div id="agent4Action" class="agent-action">Awaiting...</div></div><div id="agent4Status"></div></div>
+                    <div class="live-log" id="liveLog"></div>
                 </div>
+
+                <div id="resultsPanel" style="display: none;">
+                    <div class="results-panel">
+                        <h2 class="results-title">Synthesis Report</h2>
+                        <div class="score-box">
+                            <div class="circle-wrap">
+                                <svg width="140" height="140">
+                                    <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                                    <circle id="scoreArc" cx="70" cy="70" r="62" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="390" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+                                </svg>
+                                <div class="score-val" id="scoreNum">0%</div>
+                            </div>
+                            <div>
+                                <h3 id="grade" class="match-grade">---</h3>
+                                <p id="matchDesc" class="match-desc"></p>
+                            </div>
+                        </div>
+                        <div id="skillsContainer" class="skills-container"></div>
+                        <p id="insightText" class="insight-text"></p>
+                        <h3 style="color: var(--primary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Recommended Probes</h3>
+                        <div id="questionsContainer" class="questions-container"></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Built with ⚡ by Team <span class="team-name">Alpha Logic</span></p>
+    </footer>
+
+    <div id="dbModal" style="display: none; position: fixed; inset: 0; background: rgba(10, 22, 40, 0.8); backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center;">
+        <div style="background: #0c1929; border: 1px solid rgba(255,255,255,0.2); border-radius: 1rem; width: 90%; max-width: 800px; max-height: 80vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+            <div style="padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 1.2rem; color: #fff;">🛡️ Sentinel Database Logs</h2>
+                <button id="closeDbBtn" style="background: none; border: none; color: #fecaca; font-size: 1.5rem; cursor: pointer;">&times;</button>
             </div>
-        </main>
+            <div style="padding: 1rem 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <span style="color: #0ea5e9; font-weight: bold; font-size: 0.95rem;">🧠 Smart Filter:</span>
+                <input type="text" id="dbSearchInput" placeholder="Type candidate name..." style="flex: 1; min-width: 200px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.6rem 1rem; border-radius: 99px; outline: none;">
+                <select id="dbStatusFilter" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.6rem 1rem; border-radius: 99px; outline: none; cursor: pointer;">
+                    <option value="ALL" style="color: #000;">All Candidates</option>
+                    <option value="APPROVED" style="color: #000;">🟢 Approved Only</option>
+                    <option value="REVIEW_NEEDED" style="color: #000;">🔴 Review Needed</option>
+                </select>
+                <button id="exportCsvBtn" style="margin-left: auto; background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; color: white; padding: 0.6rem 1.2rem; border-radius: 99px; font-weight: 600; cursor: pointer;">
+    📥 Export CSV
+</button>
+            </div>
+            <div style="padding: 1rem; overflow-y: auto; flex: 1;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; color: #e2e8f0; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+                            <th style="padding: 0.75rem;">ID</th>
+                            <th style="padding: 0.75rem;">Candidate Name</th>
+                            <th style="padding: 0.75rem;">Score</th>
+                            <th style="padding: 0.75rem;">Status</th>
+                            <th style="padding: 0.75rem;">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dbTableBody"></tbody>
+                </table>
+                <div id="dbLoading" style="text-align: center; padding: 2rem; color: #0ea5e9;">Fetching data from secure servers...</div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // 🔥 EXPORT CSV FUNCTIONALITY
+const exportCsvBtn = document.getElementById('exportCsvBtn'); 
+if(exportCsvBtn) {
+    exportCsvBtn.addEventListener('click', function() {
+        // currentFilteredData wo variable hai jisme table ka data hota hai
+        let dataToExport = typeof currentFilteredData !== 'undefined' && currentFilteredData.length > 0 ? currentFilteredData : allDatabaseData;
+        
+        if(!dataToExport || dataToExport.length === 0) {
+            alert("No data to export!");
+            return;
+        }
+        
+        let csvContent = "ID,Candidate Name,Match Score,Status,Date\n";
+        
+        dataToExport.forEach(row => {
+            const date = new Date(row.created_at).toLocaleDateString();
+            const cleanName = `"${(row.candidate_name || 'Unknown').replace(/"/g, '""')}"`;
+            csvContent += `${row.id},${cleanName},${row.match_score}%,${row.status},${date}\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Sentinel_Report_${new Date().toISOString().split('T')[0]}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+}
         document.getElementById('scoreFilter').oninput = function() {
             document.getElementById('scoreVal').innerText = this.value + "%";
         };
 
+        const resumeFileInput = document.getElementById('resumeFile');
+        const resumeFileName = document.getElementById('resumeFileName');
+        const removeResumeFile = document.getElementById('removeResumeFile');
+        const resumeTextArea = document.getElementById('resumeText');
+        const jdTextArea = document.getElementById('jdText');
+        const fileDrop = document.querySelector('.file-drop');
+        const profileMenuBtn = document.getElementById('profileMenuBtn');
+        const profileDropdown = document.getElementById('profileDropdown');
+        const profileSelect = document.getElementById('profileSelect');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const scanAuthBanner = document.getElementById('scanAuthBanner');
+        let syncResumeInputs = null;
+
+        async function loadProfiles() {
+            if (!profileSelect) return;
+            try {
+                const response = await fetch('/profiles');
+                const payload = await response.json();
+                const profiles = Array.isArray(payload.profiles) ? payload.profiles : [];
+
+                profileSelect.innerHTML = '<option value="">Select profile</option>';
+                profiles.forEach((profile) => {
+                    const option = document.createElement('option');
+                    option.value = profile.id;
+                    option.textContent = profile.name;
+                    profileSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Failed to load profiles:', err);
+            }
+        }
+
+        async function loadProfileById(profileId) {
+            if (!profileId) return;
+            try {
+                const response = await fetch(`/profiles/${profileId}`);
+                const profile = await response.json();
+                if (!response.ok) return;
+
+                resumeTextArea.value = profile.resume_text || '';
+                jdTextArea.value = profile.jd_text || '';
+                if (resumeFileInput) resumeFileInput.value = '';
+                if (syncResumeInputs) syncResumeInputs();
+            } catch (err) {
+                console.error('Failed to load profile:', err);
+            }
+        }
+
+        async function saveCurrentProfile() {
+            const defaultName = `Profile ${new Date().toLocaleString()}`;
+            const name = window.prompt('Enter profile name:', defaultName);
+            if (!name || !name.trim()) return;
+
+            try {
+                const response = await fetch('/profiles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: name.trim(),
+                        resume_text: resumeTextArea.value || '',
+                        jd_text: jdTextArea.value || ''
+                    })
+                });
+
+                if (!response.ok) return;
+                await loadProfiles();
+            } catch (err) {
+                console.error('Failed to save profile:', err);
+            }
+        }
+
+        if (resumeFileInput && resumeFileName && removeResumeFile && resumeTextArea) {
+            const setFileInputEnabled = (enabled) => {
+                resumeFileInput.style.pointerEvents = enabled ? 'auto' : 'none';
+                resumeFileInput.tabIndex = enabled ? 0 : -1;
+                if (fileDrop) {
+                    fileDrop.classList.toggle('is-disabled', !enabled);
+                }
+            };
+
+            const isValidFile = (file) => {
+                if (!file) return false;
+                const nameOk = file.name.toLowerCase().endsWith('.pdf') || file.name.toLowerCase().endsWith('.docx');
+                return nameOk;
+            };
+
+           syncResumeInputs = () => {
+                const file = resumeFileInput.files && resumeFileInput.files[0];
+                const hasText = resumeTextArea.value.trim().length > 0;
+
+                if (file) {
+                    if (!isValidFile(file)) {
+                        resumeFileInput.value = '';
+                        resumeFileName.textContent = 'Only PDF/DOCX files allowed';
+                        setFileInputEnabled(true);
+                        removeResumeFile.style.display = 'none';
+                        resumeTextArea.disabled = false;
+                        resumeTextArea.placeholder = "Paste resume content here...";
+                        return;
+                    }
+                    // 🔥 NAYA: File daali toh Text area block kar do!
+                    resumeFileName.textContent = file.name;
+                    setFileInputEnabled(false);
+                    removeResumeFile.style.display = 'inline-flex';
+                    resumeTextArea.disabled = true; // Box Lock
+                    resumeTextArea.value = ''; // Agar pehle se kuch likha tha toh saaf kar do
+                    resumeTextArea.placeholder = "🔒 File uploaded. Manual entry is disabled.";
+                    return;
+                }
+
+                // 🔥 Agar file Remove kar di, toh wapas sab normal kar do
+                resumeTextArea.disabled = false;
+                resumeTextArea.placeholder = "Paste resume content here...";
+                removeResumeFile.style.display = 'none';
+
+                if (hasText) {
+                    // 🔥 NAYA: Text likha toh File upload block kar do!
+                    resumeFileName.textContent = '🔒 Manual entry active';
+                    setFileInputEnabled(false);
+                } else {
+                    // Dono khali hain
+                    resumeFileName.textContent = 'No file selected';
+                    setFileInputEnabled(true);
+                }
+            };
+
+            resumeFileInput.addEventListener('change', syncResumeInputs);
+            removeResumeFile.addEventListener('click', () => { resumeFileInput.value = ''; syncResumeInputs(); });
+            resumeTextArea.addEventListener('input', syncResumeInputs);
+            syncResumeInputs();
+        }
+
+        if (profileSelect) {
+            profileSelect.addEventListener('change', function () {
+                loadProfileById(this.value);
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('is-open');
+                    profileDropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+        if (saveProfileBtn) {
+            saveProfileBtn.addEventListener('click', saveCurrentProfile);
+        }
+        if (profileMenuBtn && profileDropdown) {
+            profileMenuBtn.addEventListener('click', function () {
+                const isOpen = profileDropdown.classList.toggle('is-open');
+                profileDropdown.setAttribute('aria-hidden', isOpen ? 'false' : 'true');
+            });
+            document.addEventListener('click', function (event) {
+                if (!profileDropdown.classList.contains('is-open')) return;
+                const clickedInsideMenu = profileDropdown.contains(event.target);
+                const clickedOnButton = profileMenuBtn.contains(event.target);
+                if (!clickedInsideMenu && !clickedOnButton) {
+                    profileDropdown.classList.remove('is-open');
+                    profileDropdown.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+        loadProfiles();
+
+        function showScanAuthErrorBanner() {
+            if (scanAuthBanner) {
+                scanAuthBanner.style.display = 'block';
+                scanAuthBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                alert('Login required. Please sign in first.');
+            }
+        }
+
+        // 🔥 NAYA LOGIC YAHAN HAI: File Name Extraction
         async function runSentinelScan(event) {
-            event.preventDefault(); // Form reload roko
+            event.preventDefault();
+            const loggedIn = document.body.getAttribute('data-logged-in') === '1';
+            if (!loggedIn) {
+                showScanAuthErrorBanner();
+                return;
+            }
             
             const form = document.getElementById('sentinelForm');
             const formData = new FormData(form);
             const minScore = document.getElementById('scoreFilter').value;
 
-            // UI Reset
+            // Extract file name without extension
+            const fileInput = document.getElementById('resumeFile');
+            if (fileInput && fileInput.files.length > 0) {
+                let fileName = fileInput.files[0].name;
+                let cleanName = fileName.split('.').slice(0, -1).join('.') || fileName; 
+                formData.append('candidate_name', cleanName);
+            } else {
+                formData.append('candidate_name', 'Manual Entry');
+            }
+
             document.getElementById('agentPanel').style.display = 'block';
             document.getElementById('resultsPanel').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = true;
@@ -176,7 +762,6 @@
             addLog("INITIATING NEURAL UPLINK...");
             
             try {
-                // IMPORTANT: FormData ke saath headers set nahi karne padte (Browser khud boundary set karega)
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     body: formData
@@ -184,13 +769,30 @@
                 
                 const data = await response.json();
 
+                if (response.status === 401 || data.login_required) {
+                    document.body.setAttribute('data-logged-in', '0');
+                    showScanAuthErrorBanner();
+                    document.getElementById('analyzeBtn').disabled = false;
+                    return;
+                }
+
+                const isErrorResponse =
+                    (Array.isArray(data.skills) && data.skills.includes('Error Encountered')) ||
+                    (typeof data.insight === 'string' && data.insight.startsWith('System Alert:'));
+
+                if (isErrorResponse) {
+                    addLog(data.insight || 'ERROR: Unable to process resume.');
+                    document.getElementById('analyzeBtn').disabled = false;
+                    return;
+                }
+
                 if(data.score < minScore) {
-                    addLog(`⚠️ ALERT: Candidate match (${data.score}%) is below set threshold (${minScore}%).`);
+                    addLog(`ALERT: Candidate match (${data.score}%) is below set threshold (${minScore}%).`);
                 }
 
                 await animatePipeline(data);
             } catch (e) {
-                addLog("❌ CONNECTION ERROR: Backend unreachable.");
+                addLog("CONNECTION ERROR: Backend unreachable.");
                 console.error(e);
                 document.getElementById('analyzeBtn').disabled = false;
             }
@@ -199,7 +801,7 @@
         function resetUI() {
             ['agent1', 'agent2', 'agent3', 'agent4'].forEach(id => {
                 document.getElementById(id).classList.remove('active', 'completed');
-                document.getElementById(`${id}Status`).innerHTML = '';
+                document.getElementById(`${id}Status`).innerHTML = '<div class="agent-spinner"></div>';
             });
             document.getElementById('liveLog').innerHTML = '';
         }
@@ -221,11 +823,15 @@
                 const agent = document.getElementById(`agent${s.n}`);
                 agent.classList.add('active');
                 document.getElementById(`agent${s.n}Action`).innerText = s.act;
-                document.getElementById(`agent${s.n}Status`).innerHTML = '<div class="agent-spinner"></div>';
+                
+                const statusEl = document.getElementById(`agent${s.n}Status`);
+                statusEl.innerHTML = '<div class="agent-spinner"></div>';
+                
                 addLog(s.act);
                 await new Promise(r => setTimeout(r, 1200));
+                
                 agent.classList.replace('active', 'completed');
-                document.getElementById(`agent${s.n}Status`).innerHTML = '<span class="checkmark">✓</span>';
+                statusEl.innerHTML = '<span class="checkmark">✓</span>';
             }
             displayFinalReport(data);
         }
@@ -246,6 +852,88 @@
             document.getElementById('resultsPanel').style.display = 'block';
             document.getElementById('analyzeBtn').disabled = false;
         }
+
+        const viewDbBtn = document.getElementById('viewDbBtn');
+        const dbModal = document.getElementById('dbModal');
+        const closeDbBtn = document.getElementById('closeDbBtn');
+        const dbTableBody = document.getElementById('dbTableBody');
+        const dbLoading = document.getElementById('dbLoading');
+        const dbSearchInput = document.getElementById('dbSearchInput');
+        const dbStatusFilter = document.getElementById('dbStatusFilter');
+
+        let allDatabaseData = []; 
+
+        function renderTable(data) {
+            dbTableBody.innerHTML = '';
+            if(data.length === 0) {
+                dbTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">No candidates match your filter.</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const statusColor = row.status === 'APPROVED' ? '#34d399' : '#f87171';
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = '1px solid rgba(255,255,255,0.05)';
+                tr.innerHTML = `
+                    <td style="padding: 0.75rem;">#${row.id}</td>
+                    <td style="padding: 0.75rem; font-weight: bold;">${row.candidate_name || 'Unknown'}</td>
+                    <td style="padding: 0.75rem; color: #22d3ee;">${row.match_score || 0}%</td>
+                    <td style="padding: 0.75rem; color: ${statusColor}; font-weight: 600;">${row.status || 'N/A'}</td>
+                    <td style="padding: 0.75rem; color: #94a3b8;">${new Date(row.created_at).toLocaleDateString()}</td>
+                `;
+                dbTableBody.appendChild(tr);
+            });
+        }
+
+        function applySmartFilter() {
+            const searchText = dbSearchInput.value.toLowerCase();
+            const statusVal = dbStatusFilter.value;
+
+            const filteredData = allDatabaseData.filter(row => {
+                const nameMatch = (row.candidate_name || '').toLowerCase().includes(searchText);
+                const statusMatch = (statusVal === 'ALL') || (row.status === statusVal);
+                return nameMatch && statusMatch;
+            });
+
+            renderTable(filteredData);
+        }
+
+        if(viewDbBtn) {
+            viewDbBtn.addEventListener('click', async function(e) {
+                e.preventDefault();
+                dbModal.style.display = 'flex'; 
+                dbTableBody.innerHTML = ''; 
+                dbLoading.style.display = 'block';
+                dbSearchInput.value = ''; 
+                dbStatusFilter.value = 'ALL'; 
+
+                try {
+                    const response = await fetch('/reports');
+                    const result = await response.json();
+                    dbLoading.style.display = 'none';
+
+                    if(result.status === 'success' && result.data.length > 0) {
+                        allDatabaseData = result.data; 
+                        renderTable(allDatabaseData); 
+                    } else {
+                        dbTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem;">No reports found in database.</td></tr>`;
+                    }
+                } catch (error) {
+                    dbLoading.innerHTML = "❌ Error fetching database!";
+                    console.error(error);
+                }
+            });
+        }
+
+        if(closeDbBtn) {
+            closeDbBtn.addEventListener('click', () => {
+                dbModal.style.display = 'none';
+            });
+        }
+
+        if(dbSearchInput) dbSearchInput.addEventListener('input', applySmartFilter);
+        if(dbStatusFilter) dbStatusFilter.addEventListener('change', applySmartFilter);
+
     </script>
 </body>
 </html>

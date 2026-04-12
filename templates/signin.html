@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in | Sentinel AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-deep: #0c1929;
+            --blue-mid: #1e3a5f;
+            --blue-bright: #0ea5e9;
+            --cyan: #22d3ee;
+            --purple: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.09);
+            --glass-border: rgba(255, 255, 255, 0.22);
+            --text: #f8fafc;
+            --text-muted: rgba(248, 250, 252, 0.75);
+            --error-bg: rgba(239, 68, 68, 0.15);
+            --error-border: rgba(248, 113, 113, 0.5);
+            --success-bg: rgba(16, 185, 129, 0.15);
+            --success-border: rgba(52, 211, 153, 0.45);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { font-size: 16px; }
+
+        body {
+            font-family: 'Poppins', system-ui, sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* Blurred “night / lights” scene (no image asset required) */
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                linear-gradient(160deg, #0a1628 0%, #132a4a 35%, #1a365d 55%, #0f172a 100%);
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 15% 85%, rgba(251, 146, 60, 0.35) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 45% at 88% 75%, rgba(251, 191, 36, 0.2) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 70% 20%, rgba(14, 165, 233, 0.25) 0%, transparent 45%);
+            filter: blur(2px);
+        }
+
+        .bg-scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath fill='rgba(255,255,255,0.04)' d='M40 8 L52 28 H68 L56 42 L60 62 L40 52 L20 62 L24 42 L12 28 H28 Z'/%3E%3C/svg%3E");
+            background-size: 120px 120px;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            background: rgba(10, 22, 40, 0.45);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand svg { flex-shrink: 0; }
+
+        .brand span {
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: 0.04em;
+        }
+
+        .top-bar a.dashboard {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0.5rem 1rem;
+            border-radius: 999px;
+            border: 1px solid var(--glass-border);
+            transition: 0.2s;
+        }
+
+        .top-bar a.dashboard:hover {
+            color: #fff;
+            border-color: var(--blue-bright);
+        }
+
+        .shell {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.25rem 3rem;
+        }
+
+        .banner {
+            max-width: 56rem;
+            width: 100%;
+            margin-bottom: 1rem;
+            padding: 0.85rem 1.1rem;
+            border-radius: 0.75rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .banner-success {
+            background: var(--success-bg);
+            border: 1px solid var(--success-border);
+            color: #a7f3d0;
+        }
+
+        .split-card {
+            width: 100%;
+            max-width: 56rem;
+            min-height: 32rem;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .layout {
+            display: none;
+            min-height: 32rem;
+        }
+
+        .layout.is-active { display: flex; }
+
+        .layout-signin { flex-direction: row; }
+        .layout-register { flex-direction: row; }
+
+        .col-glass {
+            flex: 1;
+            padding: 2.5rem 2.25rem;
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .col-promo {
+            flex: 1;
+            padding: 2.5rem 2rem;
+            background: linear-gradient(145deg, #1d4ed8 0%, #0ea5e9 45%, #06b6d4 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .col-promo::before {
+            content: '';
+            position: absolute;
+            inset: -30%;
+            background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.12) 0%, transparent 45%);
+            pointer-events: none;
+        }
+
+        .col-promo > * { position: relative; z-index: 1; }
+
+        .col-promo h2 {
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .col-promo p {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 22rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 2.5rem;
+            border-radius: 999px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            background: transparent;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .form-title {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 1.75rem;
+        }
+
+        .input-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.1rem;
+            padding: 0.65rem 1rem;
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 0.65rem;
+            transition: 0.2s;
+        }
+
+        .input-wrap:focus-within {
+            border-color: var(--blue-bright);
+            box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+        }
+
+        .input-wrap svg {
+            flex-shrink: 0;
+            opacity: 0.7;
+        }
+
+        .input-wrap input {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            min-width: 0;
+        }
+
+        .input-wrap input::placeholder {
+            color: rgba(248, 250, 252, 0.45);
+        }
+
+        .forgot {
+            display: block;
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: -0.25rem 0 1.25rem;
+            text-decoration: none;
+        }
+
+        .forgot:hover { color: #fff; text-decoration: underline; }
+
+        .btn-solid {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            margin-top: 0.35rem;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2563eb 0%, #7c3aed 50%, #0ea5e9 100%);
+            background-size: 200% auto;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+            transition: 0.25s;
+        }
+
+        .btn-solid:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+        }
+
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        .social-row a {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: 0.2s;
+        }
+
+        .social-row a:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+        }
+
+        .social-row a.gh { padding: 0; }
+        .social-row a.gh svg { display: block; }
+
+        .hint {
+            margin-top: 1.5rem;
+            font-size: 0.72rem;
+            line-height: 1.5;
+            color: rgba(248, 250, 252, 0.45);
+            text-align: center;
+        }
+
+        .hint code {
+            font-size: 0.68rem;
+            color: rgba(248, 250, 252, 0.55);
+        }
+
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.65rem;
+            font-size: 0.85rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .alert-error {
+            background: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: #fecaca;
+        }
+
+        @media (max-width: 768px) {
+            .layout-signin,
+            .layout-register {
+                flex-direction: column;
+            }
+
+            .layout-signin .col-promo { order: -1; min-height: 14rem; }
+            .layout-register .col-promo { order: -1; min-height: 14rem; }
+
+            .split-card { min-height: unset; }
+            .layout { min-height: unset; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-scene" aria-hidden="true"></div>
+    <div class="page">
+        <header class="top-bar">
+            <a class="brand" href="{{ url_for('home') }}">
+                <svg width="36" height="36" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <rect width="40" height="40" rx="10" fill="url(#g)"/>
+                    <path d="M20 10 L28 22 H24 L26 30 L20 26 L14 30 L16 22 H12 L20 10Z" fill="white" fill-opacity="0.95"/>
+                    <defs>
+                        <linearGradient id="g" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#7c3aed"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>Sentinel AI</span>
+            </a>
+            <a class="dashboard" href="{{ url_for('home') }}">Dashboard</a>
+        </header>
+
+        <div class="shell">
+            <div style="width:100%;max-width:56rem;">
+                {% if registered %}
+                <div class="banner banner-success" role="status">Account created. Sign in with your new email and password.</div>
+                {% endif %}
+
+                <div class="split-card">
+                    <!-- Sign in: glass left, promo right -->
+                    <div class="layout layout-signin {% if panel != 'register' %}is-active{% endif %}" id="layoutSignin">
+                        <div class="col-glass">
+                            <h1 class="form-title">Sign In</h1>
+                            {% if error %}
+                            <div class="alert alert-error" role="alert">{{ error }}</div>
+                            {% endif %}
+                            <form method="post" action="{{ url_for('signin') }}" novalidate>
+                                {% if request.args.get('next') %}
+                                <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                                {% endif %}
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <input type="email" name="email" placeholder="Email" value="{{ email or '' }}" required autocomplete="username">
+                                </div>
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <input type="password" name="password" placeholder="Password" required autocomplete="current-password">
+                                </div>
+                                <a class="forgot" href="#" onclick="event.preventDefault(); alert('Demo app — use demo@sentinel.ai / sentinel or your registered account.');">Forgot your password?</a>
+                                <button type="submit" class="btn-solid">Login</button>
+                            </form>
+                            <div class="social-row" aria-label="External links">
+                                <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" title="Google" aria-label="Google">G</a>
+                                <a class="gh" href="https://github.com" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                </a>
+                            </div>
+                            <p class="hint">Demo: <strong>demo@sentinel.ai</strong> / <strong>sentinel</strong> · Or register on the right. Clear empty <code>SENTINEL_DEMO_*</code> env vars if login fails.</p>
+                        </div>
+                        <div class="col-promo">
+                            <h2>Hello, Analyst!</h2>
+                            <p>Enter your credentials and continue with intelligent talent matching and Sentinel scans.</p>
+                            <button type="button" class="btn-ghost" data-show="register">Sign up</button>
+                        </div>
+                    </div>
+
+                    <!-- Register: promo left, glass right -->
+                    <div class="layout layout-register {% if panel == 'register' %}is-active{% endif %}" id="layoutRegister">
+                        <div class="col-promo">
+                            <h2>Welcome back!</h2>
+                            <p>To stay connected with Sentinel AI, sign in with your email and password.</p>
+                            <button type="button" class="btn-ghost" data-show="signin">Sign in</button>
+                        </div>
+                        <div class="col-glass">
+                            <h1 class="form-title">Create Account</h1>
+                            {% if reg_error %}
+                            <div class="alert alert-error" role="alert">{{ reg_error }}</div>
+                            {% endif %}
+                            <form method="post" action="{{ url_for('register') }}" novalidate>
+                                {% if request.args.get('next') %}
+                                <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+                                {% endif %}
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <input type="text" name="full_name" placeholder="Full name" value="{{ reg_full_name or '' }}" required autocomplete="name">
+                                </div>
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                                    <input type="email" name="email" placeholder="Email" value="{{ reg_email or '' }}" required autocomplete="email">
+                                </div>
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                    <input type="text" name="username" placeholder="Username" value="{{ reg_username or '' }}" required autocomplete="username">
+                                </div>
+                                <div class="input-wrap">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                    <input type="password" name="password" placeholder="Password" required autocomplete="new-password" minlength="4">
+                                </div>
+                                <button type="submit" class="btn-solid">Register</button>
+                            </form>
+                            <div class="social-row" aria-label="External links">
+                                <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" title="Google" aria-label="Google">G</a>
+                                <a class="gh" href="https://github.com" target="_blank" rel="noopener noreferrer" title="GitHub" aria-label="GitHub">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var signin = document.getElementById('layoutSignin');
+            var reg = document.getElementById('layoutRegister');
+            document.querySelectorAll('[data-show]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var mode = btn.getAttribute('data-show');
+                    if (mode === 'register') {
+                        signin.classList.remove('is-active');
+                        reg.classList.add('is-active');
+                    } else {
+                        reg.classList.remove('is-active');
+                        signin.classList.add('is-active');
+                    }
+                });
+            });
+        })();
+    </script>
+</body>
+</html>

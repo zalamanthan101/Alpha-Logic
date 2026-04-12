@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signed out | Sentinel AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --blue-bright: #0ea5e9;
+            --cyan: #22d3ee;
+            --purple: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.09);
+            --glass-border: rgba(255, 255, 255, 0.22);
+            --text: #f8fafc;
+            --text-muted: rgba(248, 250, 252, 0.75);
+            --success: #34d399;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Poppins', system-ui, sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .bg-scene {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                linear-gradient(160deg, #0a1628 0%, #132a4a 35%, #1a365d 55%, #0f172a 100%);
+        }
+
+        .bg-scene::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 15% 85%, rgba(251, 146, 60, 0.3) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 45% at 88% 75%, rgba(52, 211, 153, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 40% at 70% 20%, rgba(14, 165, 233, 0.22) 0%, transparent 45%);
+            filter: blur(2px);
+        }
+
+        .bg-scene::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cpath fill='rgba(255,255,255,0.04)' d='M40 8 L52 28 H68 L56 42 L60 62 L40 52 L20 62 L24 42 L12 28 H28 Z'/%3E%3C/svg%3E");
+            background-size: 120px 120px;
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 2rem;
+            background: rgba(10, 22, 40, 0.45);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .brand span {
+            font-weight: 700;
+            font-size: 1.15rem;
+            letter-spacing: 0.04em;
+        }
+
+        .shell {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.25rem 3rem;
+        }
+
+        .split-card {
+            width: 100%;
+            max-width: 56rem;
+            min-height: 28rem;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            display: flex;
+            flex-direction: row;
+            box-shadow:
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.06);
+        }
+
+        .col-glass {
+            flex: 1;
+            padding: 2.5rem 2.25rem;
+            background: var(--glass);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .icon-ring {
+            width: 5.5rem;
+            height: 5.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            background: rgba(16, 185, 129, 0.12);
+            border: 2px solid rgba(52, 211, 153, 0.45);
+            color: var(--success);
+            font-size: 2.25rem;
+            font-weight: 800;
+        }
+
+        .col-glass h1 {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 0.85rem;
+        }
+
+        .col-glass p {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            color: var(--text-muted);
+            max-width: 22rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .btn-solid {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem 2.5rem;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(90deg, #2563eb 0%, #7c3aed 50%, #0ea5e9 100%);
+            background-size: 200% auto;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+            transition: 0.25s;
+        }
+
+        .btn-solid:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+        }
+
+        .social-row {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.75rem;
+        }
+
+        .social-row a {
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 700;
+            transition: 0.2s;
+        }
+
+        .social-row a:hover {
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-3px);
+        }
+
+        .social-row a.gh svg { display: block; }
+
+        .col-promo {
+            flex: 1;
+            padding: 2.5rem 2rem;
+            background: linear-gradient(145deg, #5b21b6 0%, #7c3aed 40%, #0ea5e9 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .col-promo::before {
+            content: '';
+            position: absolute;
+            inset: -30%;
+            background: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 45%);
+            pointer-events: none;
+        }
+
+        .col-promo > * { position: relative; z-index: 1; }
+
+        .col-promo h2 {
+            font-size: clamp(1.5rem, 2.5vw, 2rem);
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .col-promo p {
+            font-size: 0.95rem;
+            line-height: 1.65;
+            color: rgba(255, 255, 255, 0.92);
+            max-width: 20rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-ghost {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.85rem 2.25rem;
+            border-radius: 999px;
+            border: 2px solid rgba(255, 255, 255, 0.95);
+            background: transparent;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: 0.25s;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .split-card {
+                flex-direction: column;
+                min-height: unset;
+            }
+            .col-promo { order: -1; min-height: 13rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-scene" aria-hidden="true"></div>
+    <div class="page">
+        <header class="top-bar">
+            <a class="brand" href="{{ url_for('signin') }}">
+                <svg width="36" height="36" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+                    <rect width="40" height="40" rx="10" fill="url(#g2)"/>
+                    <path d="M20 10 L28 22 H24 L26 30 L20 26 L14 30 L16 22 H12 L20 10Z" fill="white" fill-opacity="0.95"/>
+                    <defs>
+                        <linearGradient id="g2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#0ea5e9"/><stop offset="1" stop-color="#7c3aed"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+                <span>Sentinel AI</span>
+            </a>
+        </header>
+
+        <div class="shell">
+            <div class="split-card">
+                <div class="col-glass">
+                    <div class="icon-ring" aria-hidden="true">&#10003;</div>
+                    <h1>Signed out</h1>
+                    <p>Your session ended securely. Sign in again when you want to run Sentinel scans and review talent alignment.</p>
+                    <a class="btn-solid" href="{{ url_for('signin') }}">Sign in again</a>
+                    <div class="social-row" aria-label="External links">
+                        <a href="https://www.google.com" target="_blank" rel="noopener noreferrer" aria-label="Google">G</a>
+                        <a class="gh" href="https://github.com" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-promo">
+                    <h2>See you soon</h2>
+                    <p>Sentinel AI keeps your pipeline insights ready whenever you return.</p>
+                    <a class="btn-ghost" href="{{ url_for('signin') }}">Log in</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
