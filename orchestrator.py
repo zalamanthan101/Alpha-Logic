@@ -2,23 +2,28 @@ import os
 import json
 import re
 import concurrent.futures
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM # 👈 Naya: LLM import kiya
 from agents.parser_agent import get_parser
 from agents.normalizer_agent import get_normalizer
 from agents.matcher_agent import get_matcher
 from agents.inquisitor_agent import get_inquisitor
 
-# --- API KEY (Recommended: Use .env file) ---
+# --- API KEY ---
 os.environ["GROQ_API_KEY"] = "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"
 
-llm_model = "groq/llama-3.1-8b-instant"
+# 🔥 FIX: Model name ke aage 'groq/' hona zaroori hai
+# Aur LLM object banana sabse safe hai
+sentinel_llm = LLM(
+    model="groq/llama-3.3-70b-versatile",
+    api_key=os.environ.get("GROQ_API_KEY")
+)
 
 def _run_crew(resume_text, jd_text):
-    # Agents Initialization
-    p_agent = get_parser(llm_model)      # Node 1: Semantic Parser
-    n_agent = get_normalizer(llm_model)  # Node 2: Ontology Normalizer
-    m_agent = get_matcher(llm_model)     # Node 3: Matching Engine
-    i_agent = get_inquisitor(llm_model)   # Node 4: The Inquisitor
+    # Agents Initialization - sentinel_llm object pass kar rahe hain
+    p_agent = get_parser(sentinel_llm)      # Node 1: Semantic Parser
+    n_agent = get_normalizer(sentinel_llm)  # Node 2: Ontology Normalizer
+    m_agent = get_matcher(sentinel_llm)     # Node 3: Matching Engine
+    i_agent = get_inquisitor(sentinel_llm)   # Node 4: The Inquisitor
 
     # --- NODE 1: Parsing Task ---
     task1 = Task(
@@ -58,7 +63,7 @@ def _run_crew(resume_text, jd_text):
         context=[task3]
     )
 
-    # Sequential process insures Node 1 -> Node 2 -> Node 3 -> Node 4
+    # Sequential process
     sentinel_crew = Crew(
         agents=[p_agent, n_agent, m_agent, i_agent],
         tasks=[task1, task2, task3, task4],
@@ -69,8 +74,6 @@ def _run_crew(resume_text, jd_text):
     return sentinel_crew.kickoff()
 
 def run_sentinel_analysis(resume_text, jd_text):
-    # Max workers 1 because we want sequential execution for this pipeline
     with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
         future = executor.submit(_run_crew, resume_text, jd_text)
-        # Timeout 120s is safe for Groq Llama 3.1
         return future.result(timeout=120)
