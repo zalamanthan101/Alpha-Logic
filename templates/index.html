@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <link rel="icon" href="/Alphalogic.png" type="image/png">
     <title>Sentinel AI | Intelligent Talent Guard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -53,6 +54,93 @@
             animation: bg-shift 20s ease-in-out infinite alternate;
         }
         @keyframes bg-shift { 0%, 100% { transform: scale(1); } 100% { transform: scale(1.05); } }
+
+        /* 🔥 PDF SCANNING ANIMATION OVERLAY */
+        .pdf-scanner-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000; /* Super High Z-Index */
+        }
+
+        .pdf-scanner-overlay.active {
+            display: flex;
+        }
+
+        .scanner-container {
+            text-align: center;
+            position: relative;
+        }
+
+        .scanner-document {
+            width: 140px;
+            height: 180px;
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.05));
+            border: 2px solid var(--primary);
+            border-radius: 0.5rem;
+            margin: 0 auto 2rem;
+            position: relative;
+            box-shadow: 0 0 30px var(--glow-primary);
+            overflow: hidden;
+        }
+
+        .scanner-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), var(--accent), transparent);
+            top: 0;
+            left: 0;
+            animation: scannerMove 2.5s ease-in-out infinite;
+            box-shadow: 0 0 15px var(--primary);
+        }
+
+        @keyframes scannerMove {
+            0%, 100% { top: 0%; }
+            50% { top: 100%; }
+        }
+
+        .scanner-status {
+            color: var(--secondary);
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            animation: statusGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes statusGlow {
+            0%, 100% { color: var(--secondary); text-shadow: none; }
+            50% { color: var(--primary); text-shadow: 0 0 20px var(--glow-primary); }
+        }
+
+        .scanner-dots {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 2rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(124, 58, 237, 0.3);
+            animation: dotPulse 1.4s ease-in-out infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes dotPulse {
+            0%, 100% { transform: scale(1); opacity: 0.3; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 10px var(--primary); }
+        }
 
         /* Layout */
         .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1rem; flex: 1; width: 100%; }
@@ -274,7 +362,6 @@
             border-left-color: var(--primary); box-shadow: 0 0 20px var(--glow-primary), var(--shadow-medium); animation: pulse 2s ease-in-out infinite;
         }
         .agent-status.completed { border-left-color: var(--success); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(6, 182, 212, 0.05)); }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.8; } }
         .agent-info { flex: 1; }
         .agent-name { font-weight: 600; color: #fff; margin-bottom: 0.25rem; }
         .agent-action { font-size: 0.875rem; color: var(--secondary); font-family: 'JetBrains Mono', monospace; }
@@ -317,7 +404,7 @@
             color: #fde68a; font-size: 0.88rem; display: none;
         }
 
-        /* 🔥 NAYA: Team Footer Styles */
+        /* Footer Styles */
         .footer {
             text-align: center;
             padding: 1.5rem 0;
@@ -333,27 +420,54 @@
             letter-spacing: 0.05em;
             margin: 0;
         }
-        .team-name {
-            color: var(--primary);
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            text-shadow: 0 0 10px var(--glow-primary);
-        }
+       .team-name {
+    /* Base style */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    
+    /* 🔥 Simple Smooth Color Change */
+    animation: simpleColorShift 4s infinite alternate ease-in-out;
+}
 
-        @media (max-width: 900px) {
-            .layout-wrapper { grid-template-columns: 1fr; }
-            .sidebar { position: static; }
-            .header { flex-direction: column; gap: 1rem; }
-            .header-controls { width: 100%; justify-content: flex-start; }
-            .input-grid { grid-template-columns: 1fr; }
-        }
-
-        
+/* Color Animation Logic */
+@keyframes simpleColorShift {
+    0% {
+        color: var(--primary); /* Purple */
+        text-shadow: 0 0 10px var(--glow-primary);
+    }
+    50% {
+        color: var(--secondary); /* Cyan/Blue */
+        text-shadow: 0 0 15px var(--glow-secondary);
+    }
+    100% {
+        color: var(--accent); /* Amber/Gold */
+        text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+    }
+}
     </style>
 </head>
 <body data-logged-in="{{ '1' if current_user.is_authenticated else '0' }}">
     <div class="bg-animation"></div>
+
+    <div class="pdf-scanner-overlay" id="pdfScannerOverlay">
+        <div class="scanner-container">
+            <div class="scanner-status" id="scannerStatusText">📄 Scanning Document...</div>
+            <div class="scanner-document">
+                <div class="scanner-line"></div>
+                <div class="scanner-text">PARSING...</div>
+            </div>
+            <div class="scanner-file-info">
+                <div id="scanningFileName" style="font-weight: 600; color: var(--primary); margin-bottom: 0.5rem;">Resume.pdf</div>
+                <div style="font-size: 0.85rem; color: #94a3b8;">Extracting text & analyzing content...</div>
+            </div>
+            <div class="scanner-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
     
     <div class="container">
         <header class="header navbar">
@@ -432,7 +546,7 @@
                                 <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx">
                                 <div class="file-drop">
                                     <div class="file-drop-title">Drop your file here</div>
-                                    <div class="file-drop-sub">or click to browse (PDF/DOCX/TXT)</div>
+                                    <div class="file-drop-sub" id="dropSub">or click to browse (PDF/DOCX)</div>
                                     <div class="file-name" id="resumeFileName">No file selected</div>
                                     <button type="button" class="file-remove-btn" id="removeResumeFile" aria-label="Remove selected file" title="Remove selected file">X</button>
                                 </div>
@@ -504,9 +618,18 @@
                     <option value="APPROVED" style="color: #000;">🟢 Approved Only</option>
                     <option value="REVIEW_NEEDED" style="color: #000;">🔴 Review Needed</option>
                 </select>
+                <div style="display: flex; gap: 10px; align-items: center; margin-left: 10px;">
+    <input type="date" id="dbStartDate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.5rem; border-radius: 8px; outline: none; font-size: 0.8rem;">
+    <span style="color: #94a3b8;">to</span>
+    <input type="date" id="dbEndDate" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 0.5rem; border-radius: 8px; outline: none; font-size: 0.8rem;">
+    
+    <button id="filterDateBtn" class="auth-btn-header" style="padding: 0.5rem 1rem; font-size: 0.7rem; border-color: var(--secondary); color: var(--secondary);">
+        📅 Filter Date
+    </button>
+</div>
                 <button id="exportCsvBtn" style="margin-left: auto; background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #34d399; color: white; padding: 0.6rem 1.2rem; border-radius: 99px; font-weight: 600; cursor: pointer;">
-    📥 Export CSV
-</button>
+                    📥 Export CSV
+                </button>
             </div>
             <div style="padding: 1rem; overflow-y: auto; flex: 1;">
                 <table style="width: 100%; border-collapse: collapse; text-align: left; color: #e2e8f0; font-size: 0.9rem;">
@@ -527,37 +650,82 @@
     </div>
 
     <script>
-        // 🔥 EXPORT CSV FUNCTIONALITY
-const exportCsvBtn = document.getElementById('exportCsvBtn'); 
-if(exportCsvBtn) {
-    exportCsvBtn.addEventListener('click', function() {
-        // currentFilteredData wo variable hai jisme table ka data hota hai
-        let dataToExport = typeof currentFilteredData !== 'undefined' && currentFilteredData.length > 0 ? currentFilteredData : allDatabaseData;
-        
-        if(!dataToExport || dataToExport.length === 0) {
-            alert("No data to export!");
+        // 🔥 NAYA: Date Filter Logic
+const filterDateBtn = document.getElementById('filterDateBtn');
+const dbStartDate = document.getElementById('dbStartDate');
+const dbEndDate = document.getElementById('dbEndDate');
+
+if(filterDateBtn) {
+    filterDateBtn.addEventListener('click', function() {
+        const start = dbStartDate.value ? new Date(dbStartDate.value) : null;
+        const end = dbEndDate.value ? new Date(dbEndDate.value) : null;
+
+        if(!start && !end) {
+            alert("Please select a date range first!");
             return;
         }
-        
-        let csvContent = "ID,Candidate Name,Match Score,Status,Date\n";
-        
-        dataToExport.forEach(row => {
-            const date = new Date(row.created_at).toLocaleDateString();
-            const cleanName = `"${(row.candidate_name || 'Unknown').replace(/"/g, '""')}"`;
-            csvContent += `${row.id},${cleanName},${row.match_score}%,${row.status},${date}\n`;
+
+        const filteredByDate = allDatabaseData.filter(row => {
+            const rowDate = new Date(row.created_at);
+            // Set time to zero for accurate date comparison
+            if (start) start.setHours(0,0,0,0);
+            if (end) end.setHours(23,59,59,999);
+            
+            let match = true;
+            if (start && rowDate < start) match = false;
+            if (end && rowDate > end) match = false;
+            return match;
         });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `Sentinel_Report_${new Date().toISOString().split('T')[0]}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        renderTable(filteredByDate);
+        console.log(`Filtered ${filteredByDate.length} reports for the selected period.`);
     });
 }
+        // Global variables for overlay
+        const overlay = document.getElementById('pdfScannerOverlay');
+        const statusText = document.getElementById('scannerStatusText');
+        const scanningFileName = document.getElementById('scanningFileName');
+
+        // 🔥 REUSABLE ANIMATION FUNCTION
+        async function runScanAnimation(text, fileName, seconds) {
+            statusText.textContent = text;
+            scanningFileName.textContent = fileName || 'Resume Entry';
+            overlay.classList.add('active');
+            await new Promise(r => setTimeout(r, seconds * 1000));
+            overlay.classList.remove('active');
+        }
+
+        // Export CSV functionality
+        const exportCsvBtn = document.getElementById('exportCsvBtn'); 
+        if(exportCsvBtn) {
+            exportCsvBtn.addEventListener('click', function() {
+                let dataToExport = typeof currentFilteredData !== 'undefined' && currentFilteredData.length > 0 ? currentFilteredData : allDatabaseData;
+                
+                if(!dataToExport || dataToExport.length === 0) {
+                    alert("No data to export!");
+                    return;
+                }
+                
+                let csvContent = "ID,Candidate Name,Match Score,Status,Date\n";
+                
+                dataToExport.forEach(row => {
+                    const date = new Date(row.created_at).toLocaleDateString();
+                    const cleanName = `"${(row.candidate_name || 'Unknown').replace(/"/g, '""')}"`;
+                    csvContent += `${row.id},${cleanName},${row.match_score}%,${row.status},${date}\n`;
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `Sentinel_Report_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
         document.getElementById('scoreFilter').oninput = function() {
             document.getElementById('scoreVal').innerText = this.value + "%";
         };
@@ -648,7 +816,7 @@ if(exportCsvBtn) {
                 return nameOk;
             };
 
-           syncResumeInputs = () => {
+            syncResumeInputs = async () => {
                 const file = resumeFileInput.files && resumeFileInput.files[0];
                 const hasText = resumeTextArea.value.trim().length > 0;
 
@@ -659,30 +827,28 @@ if(exportCsvBtn) {
                         setFileInputEnabled(true);
                         removeResumeFile.style.display = 'none';
                         resumeTextArea.disabled = false;
-                        resumeTextArea.placeholder = "Paste resume content here...";
                         return;
                     }
-                    // 🔥 NAYA: File daali toh Text area block kar do!
                     resumeFileName.textContent = file.name;
                     setFileInputEnabled(false);
                     removeResumeFile.style.display = 'inline-flex';
-                    resumeTextArea.disabled = true; // Box Lock
-                    resumeTextArea.value = ''; // Agar pehle se kuch likha tha toh saaf kar do
+                    resumeTextArea.disabled = true;
+                    resumeTextArea.value = '';
                     resumeTextArea.placeholder = "🔒 File uploaded. Manual entry is disabled.";
+                    
+                    // 🔥 NAYA: 2 Second Animation on Selection
+                    await runScanAnimation("📄 PRE-SCANNING DOCUMENT...", file.name, 2);
                     return;
                 }
 
-                // 🔥 Agar file Remove kar di, toh wapas sab normal kar do
                 resumeTextArea.disabled = false;
                 resumeTextArea.placeholder = "Paste resume content here...";
                 removeResumeFile.style.display = 'none';
 
                 if (hasText) {
-                    // 🔥 NAYA: Text likha toh File upload block kar do!
                     resumeFileName.textContent = '🔒 Manual entry active';
                     setFileInputEnabled(false);
                 } else {
-                    // Dono khali hain
                     resumeFileName.textContent = 'No file selected';
                     setFileInputEnabled(true);
                 }
@@ -732,7 +898,6 @@ if(exportCsvBtn) {
             }
         }
 
-        // 🔥 NAYA LOGIC YAHAN HAI: File Name Extraction
         async function runSentinelScan(event) {
             event.preventDefault();
             const loggedIn = document.body.getAttribute('data-logged-in') === '1';
@@ -745,21 +910,23 @@ if(exportCsvBtn) {
             const formData = new FormData(form);
             const minScore = document.getElementById('scoreFilter').value;
 
-            // Extract file name without extension
             const fileInput = document.getElementById('resumeFile');
+            let fName = "Manual Entry";
             if (fileInput && fileInput.files.length > 0) {
-                let fileName = fileInput.files[0].name;
-                let cleanName = fileName.split('.').slice(0, -1).join('.') || fileName; 
-                formData.append('candidate_name', cleanName);
+                fName = fileInput.files[0].name;
+                formData.append('candidate_name', fName.split('.').slice(0, -1).join('.'));
             } else {
                 formData.append('candidate_name', 'Manual Entry');
             }
+
+            // 🔥 NAYA: 5 Second Deep Scan Animation on Button Click
+            await runScanAnimation("🛡️ DEEP NEURAL SCANNING...", fName, 5);
 
             document.getElementById('agentPanel').style.display = 'block';
             document.getElementById('resultsPanel').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = true;
             resetUI();
-            addLog("INITIATING NEURAL UPLINK...");
+            addLog("NEURAL LINK SECURED. INITIATING ANALYSIS...");
             
             try {
                 const response = await fetch('/analyze', {
@@ -814,10 +981,10 @@ if(exportCsvBtn) {
 
         async function animatePipeline(data) {
             const steps = [
-                {n:1, act: "Parsing Document Structure..."},
+                {n:1, act: "Parsing Document structure..."},
                 {n:2, act: "Normalizing Semantic Jargon..."},
                 {n:3, act: `Alignment Score: ${data.score}%`},
-                {n:4, act: "Generating Contextual Questions..."}
+                {n:4, act: "Generating Synthesis Report..."}
             ];
             for(let s of steps) {
                 const agent = document.getElementById(`agent${s.n}`);
@@ -862,8 +1029,10 @@ if(exportCsvBtn) {
         const dbStatusFilter = document.getElementById('dbStatusFilter');
 
         let allDatabaseData = []; 
+        let currentFilteredData = [];
 
         function renderTable(data) {
+            currentFilteredData = data;
             dbTableBody.innerHTML = '';
             if(data.length === 0) {
                 dbTableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 2rem; color: #94a3b8;">No candidates match your filter.</td></tr>`;
