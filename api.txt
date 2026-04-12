@@ -1,0 +1,7 @@
+https://api.groq.com/openai/v1/chat/completions
+
+
+
+
+
+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
