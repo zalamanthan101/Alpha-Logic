@@ -7,6 +7,7 @@
     <link rel="icon" href="/Alphalogic.png" type="image/png">
     <title>Sentinel AI | Intelligent Talent Guard</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* Reset and Base Styles */
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -445,6 +446,21 @@
         text-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
     }
 }
+    
+        /* Chatbot Modal */
+        .chatbot-btn { position: fixed; bottom: 2rem; right: 2rem; background: var(--primary); color: #fff; width: 60px; height: 60px; border-radius: 50%; display: none; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow-heavy); border: none; font-size: 1.5rem; transition: transform 0.3s ease; z-index: 1000; }
+        .chatbot-btn:hover { transform: scale(1.1); }
+        .chatbot-modal { display: none; position: fixed; bottom: 6rem; right: 2rem; width: 350px; height: 500px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(25px); border-radius: 1rem; border: 1px solid var(--primary); box-shadow: var(--shadow-heavy); z-index: 1001; flex-direction: column; overflow: hidden; }
+        .chatbot-header { padding: 1rem; background: rgba(124, 58, 237, 0.2); border-bottom: 1px solid var(--primary); display: flex; justify-content: space-between; align-items: center; color: #fff; font-weight: 700; }
+        .chatbot-close { cursor: pointer; color: #fecaca; font-weight: 800; }
+        .chatbot-body { flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-msg { padding: 0.75rem; border-radius: 0.5rem; font-size: 0.85rem; max-width: 85%; }
+        .chat-ai { background: rgba(30, 41, 59, 0.8); border: 1px solid var(--secondary); color: #fff; align-self: flex-start; }
+        .chat-user { background: var(--primary); color: #fff; align-self: flex-end; }
+        .chatbot-footer { display: flex; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .chatbot-input { flex: 1; background: transparent; border: none; padding: 1rem; color: #fff; outline: none; }
+        .chatbot-send { background: var(--primary); border: none; color: #fff; padding: 0 1rem; cursor: pointer; font-weight: 700; }
+
     </style>
 </head>
 <body data-logged-in="{{ '1' if current_user.is_authenticated else '0' }}">
@@ -540,20 +556,20 @@
                 <form id="sentinelForm" onsubmit="runSentinelScan(event)">
                     <div class="input-grid">
                         <div class="card">
-                            <div class="card-header">Candidate Dossier</div>
+                            <div class="card-header">Candidate Dossier (Bulk Upload Supported)</div>
                             
                             <div class="file-input-wrapper">
-                                <input type="file" id="resumeFile" name="resume_file" accept=".pdf,.docx">
+                                <input type="file" id="resumeFile" name="resume_files" accept=".pdf,.docx" multiple>
                                 <div class="file-drop">
-                                    <div class="file-drop-title">Drop your file here</div>
+                                    <div class="file-drop-title">Drop your files here</div>
                                     <div class="file-drop-sub" id="dropSub">or click to browse (PDF/DOCX)</div>
-                                    <div class="file-name" id="resumeFileName">No file selected</div>
-                                    <button type="button" class="file-remove-btn" id="removeResumeFile" aria-label="Remove selected file" title="Remove selected file">X</button>
+                                    <div class="file-name" id="resumeFileName">No files selected</div>
+                                    <button type="button" class="file-remove-btn" id="removeResumeFile" aria-label="Remove selected files" title="Remove selected files">X</button>
                                 </div>
                             </div>
                             
                             <div class="or-divider">-- OR PASTE MANUALLY --</div>
-                            <textarea id="resumeText" name="resume" placeholder="Paste resume content here..."></textarea>
+                            <textarea id="resumeText" name="resume" placeholder="Paste single resume content here..."></textarea>
                         </div>
                         
                         <div class="card">
@@ -562,7 +578,7 @@
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn-analyze" id="analyzeBtn">Initialize Sentinel Scan</button>
+                    <button type="submit" class="btn-analyze" id="analyzeBtn">Initialize Sentinel Bulk Scan</button>
                 </form>
 
                 <div class="agent-panel" id="agentPanel" style="display: none;">
@@ -571,32 +587,34 @@
                     <div id="agent2" class="agent-status"><div class="agent-info"><div class="agent-name">Node 2: Ontology Normalizer</div><div id="agent2Action" class="agent-action">Awaiting...</div></div><div id="agent2Status"></div></div>
                     <div id="agent3" class="agent-status"><div class="agent-info"><div class="agent-name">Node 3: Matching Engine</div><div id="agent3Action" class="agent-action">Awaiting...</div></div><div id="agent3Status"></div></div>
                     <div id="agent4" class="agent-status"><div class="agent-info"><div class="agent-name">Node 4: The Inquisitor</div><div id="agent4Action" class="agent-action">Awaiting...</div></div><div id="agent4Status"></div></div>
+                    <div id="agent5" class="agent-status"><div class="agent-info"><div class="agent-name">Node 5: Generator Engine</div><div id="agent5Action" class="agent-action">Awaiting...</div></div><div id="agent5Status"></div></div>
                     <div class="live-log" id="liveLog"></div>
                 </div>
 
                 <div id="resultsPanel" style="display: none;">
-                    <div class="results-panel">
+                    <div class="results-panel" id="dynamicResultsContainer">
                         <h2 class="results-title">Synthesis Report</h2>
-                        <div class="score-box">
-                            <div class="circle-wrap">
-                                <svg width="140" height="140">
-                                    <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
-                                    <circle id="scoreArc" cx="70" cy="70" r="62" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="390" stroke-linecap="round" transform="rotate(-90 70 70)"/>
-                                </svg>
-                                <div class="score-val" id="scoreNum">0%</div>
-                            </div>
-                            <div>
-                                <h3 id="grade" class="match-grade">---</h3>
-                                <p id="matchDesc" class="match-desc"></p>
-                            </div>
-                        </div>
-                        <div id="skillsContainer" class="skills-container"></div>
-                        <p id="insightText" class="insight-text"></p>
-                        <h3 style="color: var(--primary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Recommended Probes</h3>
-                        <div id="questionsContainer" class="questions-container"></div>
+                        <div id="mainReportArea">
+                             </div>
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    
+    <button id="chatbotBtn" class="chatbot-btn">💬</button>
+    <div id="chatbotModal" class="chatbot-modal">
+        <div class="chatbot-header">
+            <span>AI Mock Interviewer</span>
+            <span id="chatbotClose" class="chatbot-close">X</span>
+        </div>
+        <div id="chatbotBody" class="chatbot-body">
+            <div class="chat-msg chat-ai">Hi! Let's start the technical interview. Are you ready?</div>
+        </div>
+        <div class="chatbot-footer">
+            <input type="text" id="chatbotInput" class="chatbot-input" placeholder="Type your answer...">
+            <button id="chatbotSend" class="chatbot-send">Send</button>
         </div>
     </div>
 
@@ -650,7 +668,7 @@
     </div>
 
     <script>
-        // 🔥 NAYA: Date Filter Logic
+        // 🔥 Date Filter Logic
 const filterDateBtn = document.getElementById('filterDateBtn');
 const dbStartDate = document.getElementById('dbStartDate');
 const dbEndDate = document.getElementById('dbEndDate');
@@ -689,7 +707,7 @@ if(filterDateBtn) {
         // 🔥 REUSABLE ANIMATION FUNCTION
         async function runScanAnimation(text, fileName, seconds) {
             statusText.textContent = text;
-            scanningFileName.textContent = fileName || 'Resume Entry';
+            scanningFileName.textContent = fileName || 'Batch Processing';
             overlay.classList.add('active');
             await new Promise(r => setTimeout(r, seconds * 1000));
             overlay.classList.remove('active');
@@ -817,27 +835,24 @@ if(filterDateBtn) {
             };
 
             syncResumeInputs = async () => {
-                const file = resumeFileInput.files && resumeFileInput.files[0];
+                const files = resumeFileInput.files;
                 const hasText = resumeTextArea.value.trim().length > 0;
 
-                if (file) {
-                    if (!isValidFile(file)) {
-                        resumeFileInput.value = '';
-                        resumeFileName.textContent = 'Only PDF/DOCX files allowed';
-                        setFileInputEnabled(true);
-                        removeResumeFile.style.display = 'none';
-                        resumeTextArea.disabled = false;
-                        return;
-                    }
-                    resumeFileName.textContent = file.name;
+                if (files && files.length > 0) {
+                    const count = files.length;
+                    resumeFileName.textContent = count === 1 ? files[0].name : `${count} resumes selected`;
                     setFileInputEnabled(false);
                     removeResumeFile.style.display = 'inline-flex';
                     resumeTextArea.disabled = true;
                     resumeTextArea.value = '';
-                    resumeTextArea.placeholder = "🔒 File uploaded. Manual entry is disabled.";
+                    resumeTextArea.placeholder = "🔒 Bulk Upload active. Manual entry disabled.";
                     
-                    // 🔥 NAYA: 2 Second Animation on Selection
-                    await runScanAnimation("📄 PRE-SCANNING DOCUMENT...", file.name, 2);
+                    // 🔥 UI Polish: Small animation when files are selected
+                    if (count === 1) {
+                        await runScanAnimation("📄 PRE-SCANNING DOCUMENT...", files[0].name, 2);
+                    } else {
+                        await runScanAnimation("📂 PRE-SCANNING BATCH...", `${count} Files`, 2);
+                    }
                     return;
                 }
 
@@ -849,7 +864,7 @@ if(filterDateBtn) {
                     resumeFileName.textContent = '🔒 Manual entry active';
                     setFileInputEnabled(false);
                 } else {
-                    resumeFileName.textContent = 'No file selected';
+                    resumeFileName.textContent = 'No files selected';
                     setFileInputEnabled(true);
                 }
             };
@@ -910,25 +925,26 @@ if(filterDateBtn) {
             const formData = new FormData(form);
             const minScore = document.getElementById('scoreFilter').value;
 
-            const fileInput = document.getElementById('resumeFile');
-            let fName = "Manual Entry";
-            if (fileInput && fileInput.files.length > 0) {
-                fName = fileInput.files[0].name;
-                formData.append('candidate_name', fName.split('.').slice(0, -1).join('.'));
-            } else {
-                formData.append('candidate_name', 'Manual Entry');
+            const files = resumeFileInput.files;
+            let displayHeader = "Processing Scan";
+            
+            if (files.length > 1) {
+                displayHeader = `Bulk Scan: ${files.length} Candidates`;
+            } else if (files.length === 1) {
+                displayHeader = `Scanning: ${files[0].name}`;
             }
 
-            // 🔥 NAYA: 5 Second Deep Scan Animation on Button Click
-            await runScanAnimation("🛡️ DEEP NEURAL SCANNING...", fName, 5);
+            // 🔥 5 Second Deep Scan Animation
+            await runScanAnimation("🛡️ DEEP NEURAL BATCH SCANNING...", displayHeader, 5);
 
             document.getElementById('agentPanel').style.display = 'block';
             document.getElementById('resultsPanel').style.display = 'none';
             document.getElementById('analyzeBtn').disabled = true;
             resetUI();
-            addLog("NEURAL LINK SECURED. INITIATING ANALYSIS...");
+            addLog(`NEURAL LINK SECURED. INITIATING ${files.length > 1 ? 'BULK' : 'SINGLE'} ANALYSIS...`);
             
             try {
+                // Backend needs to handle 'resume_files' list
                 const response = await fetch('/analyze', {
                     method: 'POST',
                     body: formData
@@ -940,33 +956,62 @@ if(filterDateBtn) {
                     document.body.setAttribute('data-logged-in', '0');
                     showScanAuthErrorBanner();
                     document.getElementById('analyzeBtn').disabled = false;
+            
+            // Re-bind dynamically injected buttons
+            const dpBtn = document.getElementById('exportPdfBtn');
+            if(dpBtn) {
+                dpBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('dynamicResultsContainer');
+                    html2pdf().from(element).save('Sentinel_Report.pdf');
+                });
+            }
+            
+            const siBtn = document.getElementById('startInterviewBtn');
+            if(siBtn) {
+                siBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('chatbotBtn').style.display = 'flex';
+                    document.getElementById('chatbotModal').style.display = 'flex';
+                });
+            }
                     return;
                 }
 
-                const isErrorResponse =
-                    (Array.isArray(data.skills) && data.skills.includes('Error Encountered')) ||
-                    (typeof data.insight === 'string' && data.insight.startsWith('System Alert:'));
+                // Handling list of results from bulk upload
+                const resultsArray = Array.isArray(data) ? data : [data];
+                
+                await animatePipeline(resultsArray[0]); // Animate for the first one as representative
+                displayFinalReport(resultsArray);
 
-                if (isErrorResponse) {
-                    addLog(data.insight || 'ERROR: Unable to process resume.');
-                    document.getElementById('analyzeBtn').disabled = false;
-                    return;
-                }
-
-                if(data.score < minScore) {
-                    addLog(`ALERT: Candidate match (${data.score}%) is below set threshold (${minScore}%).`);
-                }
-
-                await animatePipeline(data);
             } catch (e) {
                 addLog("CONNECTION ERROR: Backend unreachable.");
                 console.error(e);
                 document.getElementById('analyzeBtn').disabled = false;
+            
+            // Re-bind dynamically injected buttons
+            const dpBtn = document.getElementById('exportPdfBtn');
+            if(dpBtn) {
+                dpBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('dynamicResultsContainer');
+                    html2pdf().from(element).save('Sentinel_Report.pdf');
+                });
+            }
+            
+            const siBtn = document.getElementById('startInterviewBtn');
+            if(siBtn) {
+                siBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('chatbotBtn').style.display = 'flex';
+                    document.getElementById('chatbotModal').style.display = 'flex';
+                });
+            }
             }
         }
 
         function resetUI() {
-            ['agent1', 'agent2', 'agent3', 'agent4'].forEach(id => {
+            ['agent1', 'agent2', 'agent3', 'agent4', 'agent5'].forEach(id => {
                 document.getElementById(id).classList.remove('active', 'completed');
                 document.getElementById(`${id}Status`).innerHTML = '<div class="agent-spinner"></div>';
             });
@@ -979,12 +1024,13 @@ if(filterDateBtn) {
             log.scrollTop = log.scrollHeight;
         }
 
-        async function animatePipeline(data) {
+        async function animatePipeline(sampleData) {
             const steps = [
-                {n:1, act: "Parsing Document structure..."},
+                {n:1, act: "Parsing Batch structures..."},
                 {n:2, act: "Normalizing Semantic Jargon..."},
-                {n:3, act: `Alignment Score: ${data.score}%`},
-                {n:4, act: "Generating Synthesis Report..."}
+                {n:3, act: sampleData ? `Analyzing Top Match: ${sampleData.score}%` : "Calculating Alignment Scores..."},
+                {n:4, act: "Generating Critical Interview Probes..."},
+                {n:5, act: "Drafting Cover Letter & Emails..."}
             ];
             for(let s of steps) {
                 const agent = document.getElementById(`agent${s.n}`);
@@ -1000,24 +1046,99 @@ if(filterDateBtn) {
                 agent.classList.replace('active', 'completed');
                 statusEl.innerHTML = '<span class="checkmark">✓</span>';
             }
-            displayFinalReport(data);
         }
 
-        function displayFinalReport(data) {
-            const score = data.score || 0;
+        function displayFinalReport(dataArray) {
+            const container = document.getElementById('mainReportArea');
+            container.innerHTML = '';
+            
+            // 🔥 Leaderboard Mode if more than 1 file
+            if (dataArray.length > 1) {
+                let leaderboardHtml = `
+                    <div style="background: rgba(30, 41, 59, 0.5); padding: 1.5rem; border-radius: 1rem; border: 1px solid var(--secondary); margin-bottom: 2rem;">
+                        <h3 style="color: var(--secondary); margin-bottom: 1rem;">📊 BATCH LEADERBOARD</h3>
+                        <table style="width: 100%; border-collapse: collapse; color: #fff; font-size: 0.95rem;">
+                            <tr style="border-bottom: 2px solid var(--primary); color: var(--secondary);">
+                                <th style="text-align: left; padding: 10px;">Candidate</th>
+                                <th style="text-align: center; padding: 10px;">Score</th>
+                                <th style="text-align: right; padding: 10px;">Status</th>
+                            </tr>
+                `;
+                
+                dataArray.sort((a,b) => b.score - a.score).forEach(item => {
+                    const statusColor = item.score >= 80 ? 'var(--success)' : 'var(--error)';
+                    leaderboardHtml += `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            <td style="padding: 12px 10px;">${item.filename || 'Candidate'}</td>
+                            <td style="padding: 12px 10px; text-align: center; font-weight: 800; color: var(--primary);">${item.score}%</td>
+                            <td style="padding: 12px 10px; text-align: right; color: ${statusColor}; font-weight: 700;">${item.score >= 80 ? 'APPROVED' : 'REVIEW'}</td>
+                        </tr>
+                    `;
+                });
+                
+                leaderboardHtml += `</table></div>`;
+                container.innerHTML = leaderboardHtml;
+            }
+
+            // Display Detail for the Top Candidate
+            const top = dataArray[0];
+            const score = top.score || 0;
             const circumference = 390; 
             const offset = circumference - (score / 100) * circumference;
-            document.getElementById('scoreArc').style.strokeDashoffset = offset;
-            document.getElementById('scoreNum').innerText = score + "%";
-            document.getElementById('grade').innerText = score >= 80 ? "🛡️ GUARDIAN APPROVED" : "⚠️ SCRUTINY REQUIRED";
-            document.getElementById('matchDesc').innerText = score >= 70 ? "High alignment confirmed." : "Anomalies detected.";
-            
-            document.getElementById('skillsContainer').innerHTML = (data.skills || []).map(s => `<span class="skill-badge">${s}</span>`).join('');
-            document.getElementById('insightText').innerText = data.insight || "No detailed insight available.";
-            document.getElementById('questionsContainer').innerHTML = (data.questions || []).map(q => `<div class="question-item">» ${q}</div>`).join('');
 
+            const detailHtml = `
+                <div class="score-box">
+                    <div class="circle-wrap">
+                        <svg width="140" height="140">
+                            <circle cx="70" cy="70" r="62" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="8"/>
+                            <circle cx="70" cy="70" r="62" fill="none" stroke="var(--primary)" stroke-width="8" stroke-dasharray="390" stroke-dashoffset="${offset}" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+                        </svg>
+                        <div class="score-val">${score}%</div>
+                    </div>
+                    <div>
+                        <h3 class="match-grade">${score >= 80 ? "🛡️ GUARDIAN APPROVED" : "⚠️ SCRUTINY REQUIRED"}</h3>
+                        <p class="match-desc">Top Candidate: ${top.filename || 'Processed'}<br>${score >= 70 ? "High alignment confirmed." : "Anomalies detected."}</p>
+                    </div>
+                </div>
+                <div class="skills-container">${(top.skills || []).map(s => `<span class="skill-badge">${s}</span>`).join('')}</div>
+                <p class="insight-text">${top.insight || "No detailed insight available."}</p>
+                <h3 style="color: var(--primary); margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Top Candidate Probes</h3>
+                <div class="questions-container">${(top.questions || []).map(q => `<div class="question-item">» ${q}</div>`).join('')}</div>
+                
+                <h3 style="color: var(--secondary); margin-bottom: 1rem; margin-top: 2rem; text-transform: uppercase;">📄 Generated Cover Letter</h3>
+                <div class="insight-text" style="border-left-color: var(--secondary); font-family: 'Inter', sans-serif;">${top.cover_letter ? top.cover_letter.replace(/\n/g, '<br>') : "Generating..."}</div>
+                
+                <h3 style="color: var(--accent); margin-bottom: 1rem; margin-top: 2rem; text-transform: uppercase;">📧 Recruiter Cold Email</h3>
+                <div class="insight-text" style="border-left-color: var(--accent); font-family: 'Inter', sans-serif;">${top.cold_email ? top.cold_email.replace(/\n/g, '<br>') : "Generating..."}</div>
+
+                <div style="margin-top: 2rem; display: flex; gap: 1rem;">
+                    <button class="btn-analyze" id="exportPdfBtn" style="flex: 1; margin: 0; padding: 1rem;">📥 Export Dosier PDF</button>
+                    <button class="btn-analyze" id="startInterviewBtn" style="flex: 1; margin: 0; padding: 1rem; background: var(--secondary);">💬 Start Mock Interview</button>
+                </div>
+            `;
+            
+            container.innerHTML += detailHtml;
             document.getElementById('resultsPanel').style.display = 'block';
             document.getElementById('analyzeBtn').disabled = false;
+            
+            // Re-bind dynamically injected buttons
+            const dpBtn = document.getElementById('exportPdfBtn');
+            if(dpBtn) {
+                dpBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const element = document.getElementById('dynamicResultsContainer');
+                    html2pdf().from(element).save('Sentinel_Report.pdf');
+                });
+            }
+            
+            const siBtn = document.getElementById('startInterviewBtn');
+            if(siBtn) {
+                siBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.getElementById('chatbotBtn').style.display = 'flex';
+                    document.getElementById('chatbotModal').style.display = 'flex';
+                });
+            }
         }
 
         const viewDbBtn = document.getElementById('viewDbBtn');
@@ -1103,6 +1224,61 @@ if(filterDateBtn) {
         if(dbSearchInput) dbSearchInput.addEventListener('input', applySmartFilter);
         if(dbStatusFilter) dbStatusFilter.addEventListener('change', applySmartFilter);
 
-    </script>
+    
+        // Chatbot logic
+        const chatAPI = async (user_msg) => {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: user_msg})
+                });
+                const data = await response.json();
+                return data.reply;
+            } catch(e) { return "Connection Error with AI Interviewer."; }
+        }
+
+        const cbClose = document.getElementById('chatbotClose');
+        if(cbClose) cbClose.addEventListener('click', () => {
+            document.getElementById('chatbotModal').style.display = 'none';
+        });
+
+        const cbBtn = document.getElementById('chatbotBtn');
+        if(cbBtn) cbBtn.addEventListener('click', () => {
+            const modal = document.getElementById('chatbotModal');
+            modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+        });
+
+        const cbSend = document.getElementById('chatbotSend');
+        if(cbSend) cbSend.addEventListener('click', async () => {
+            const input = document.getElementById('chatbotInput');
+            const body = document.getElementById('chatbotBody');
+            if(!input.value.trim()) return;
+
+            const msg = input.value.trim();
+            body.innerHTML += `<div class="chat-msg chat-user">${msg}</div>`;
+            input.value = '';
+            body.scrollTop = body.scrollHeight;
+
+            const aiWait = document.createElement('div');
+            aiWait.className = "chat-msg chat-ai";
+            aiWait.innerText = "Thinking...";
+            body.appendChild(aiWait);
+            
+            const reply = await chatAPI(msg);
+            aiWait.innerText = reply;
+            body.scrollTop = body.scrollHeight;
+        });
+        
+        const cbInput = document.getElementById('chatbotInput');
+        if(cbInput) {
+            cbInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('chatbotSend').click();
+                }
+            });
+        }
+
+</script>
 </body>
 </html>
